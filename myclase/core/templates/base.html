@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Mercadito{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="https://img.icons8.com/officel/80/shop.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+ <style>
+       .btn-light {
+                   background-color: #ced4da ;
+                   }
+
+       .btn-light:hover{
+                   background-color: #e5ecf3;
+                   } 
+</style>
+</head>
+<body class="bg-dark-subtle text-dark">
+  <nav class="container-fluid bg-black">
+    <ul>
+      <li><strong>Mercadito</strong></li>
+    </ul>
+    <ul>
+      {% if user.is_authenticated %}
+        <li>Hola, {{ user.first_name|default:user.username }}</li>
+        <li><a href="{% url 'account_logout' %}"><img width="30" height="30" src="https://img.icons8.com/fluency/30/emergency-exit.png" alt="emergency-exit"/></a></li>
+      {% else %}
+        <li><a href="{% url 'account_login' %}"><img width="30" height="30" src="https://img.icons8.com/cute-clipart/30/enter-2.png" alt="enter-2"/></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</html>
