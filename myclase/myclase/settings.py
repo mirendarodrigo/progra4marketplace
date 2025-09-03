@@ -54,11 +54,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
- "allauth.account.middleware.AccountMiddleware", necesario para auth
+ "allauth.account.middleware.AccountMiddleware", #necesario para auth
 
 ]
 
-ROOT_URLCONF = "config.urls"
+ROOT_URLCONF = "myclase.urls"
 
 TEMPLATES = [
     {
@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+WSGI_APPLICATION = "myclase.wsgi.application"
 
 DATABASES = {
     "default": {
@@ -102,6 +102,11 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": ["user:email"],
     },
 }
+
+CSRF_TRUSTED_ORIGINS = [
+   "https://fighter-wireless-supplement-chem.trycloudflare.com"
+]
+
 
 STATIC_URL = "static/"
 
