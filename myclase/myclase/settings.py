@@ -104,7 +104,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-   "https://fighter-wireless-supplement-chem.trycloudflare.com"
+   "https://factory-strengths-signing-unit.trycloudflare.com"
 ]
 
 
