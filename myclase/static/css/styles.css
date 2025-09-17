@@ -1,0 +1,46 @@
+/* Quitar borde y resaltar en botones del carousel */
+.custom-carousel-btn:focus,
+.custom-carousel-btn:active {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+/* Tamaño de iconos de carrusel */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Carrusel: imagen consistente y tamaño fijo para evitar saltos */
+.object-fit-cover {
+  object-fit: cover;
+}
+
+/* Asegurar que el carrusel ocupe todo el alto del contenedor */
+#infoCarousel, 
+#infoCarousel .carousel-inner, 
+#infoCarousel .carousel-item,
+#infoCarousel img {
+  height: 100%;
+}
+
+/* Ajustar caption para ocupar todo el alto */
+.carousel-caption {
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedores para ajustar ancho y altura */
+.carrusel-container {
+  max-width: 55%;
+}
+
+.login-container {
+  max-width: 45%;
+}
