@@ -60,6 +60,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "myclase.urls"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -71,6 +75,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",  # <-- requerido por allauth
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                'market.context_processors.user_avatar',
             ],
         },
     },

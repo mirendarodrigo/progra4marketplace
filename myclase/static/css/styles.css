@@ -1,4 +1,12 @@
-/* Quitar borde y resaltar en botones del carousel */
+:root {
+  --orange-pantone: #f56416ff;
+  --falu-red: #772014ff;
+  --gray: #7c7c7cff;
+  --jasmine: #ffd97dff;
+  --maize: #fff689ff;
+}
+
+/* ------------------------ CARRUSEL ------------------------ */
 .custom-carousel-btn:focus,
 .custom-carousel-btn:active {
   outline: none;
@@ -6,19 +14,26 @@
   border: none;
 }
 
-/* Tamaño de iconos de carrusel */
+#infoCarousel {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#infoCarousel img {
+  border-radius: 20px;
+  object-fit: cover;
+}
+
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
   width: 3rem;
   height: 3rem;
 }
 
-/* Carrusel: imagen consistente y tamaño fijo para evitar saltos */
 .object-fit-cover {
   object-fit: cover;
 }
 
-/* Asegurar que el carrusel ocupe todo el alto del contenedor */
 #infoCarousel, 
 #infoCarousel .carousel-inner, 
 #infoCarousel .carousel-item,
@@ -26,7 +41,6 @@
   height: 100%;
 }
 
-/* Ajustar caption para ocupar todo el alto */
 .carousel-caption {
   top: 0;
   bottom: 0;
@@ -36,11 +50,274 @@
   align-items: center;
 }
 
-/* Contenedores para ajustar ancho y altura */
+/* ------------------------ CONTENEDORES ------------------------ */
 .carrusel-container {
   max-width: 55%;
 }
 
 .login-container {
   max-width: 45%;
+}
+
+/* ------------------------ NAVBAR ------------------------ */
+.navbar {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 20px;
+}
+
+.container-fluid.d-flex.justify-content-between.align-items-center.px-3.py-1 {
+  height: 55px;
+  padding: 20px;
+  align-items: center;
+  background-color: var(--orange-pantone) !important;
+}
+
+/* Navbar searchbox */
+.form-control.navbar-search-input.me-2 {
+  margin-top: 20px;
+  width: 300px;
+  max-width: 100%;
+  height: 30px;
+  font-size: 0.9rem;
+  border-radius: 20px 0px 0px 20px;
+  border: 1px solid var(--gray);
+  background-color: var(--maize);
+  color: #000;
+}
+
+#navbar-search-btn {
+  margin-top: 20px;
+  width: 35px;
+  height: 30px;
+  background-color: var(--jasmine);
+  border-radius: 0px 20px 20px 0px;
+  transition: all 0.2s ease;
+}
+
+#navbar-search-btn i {
+  font-size: .7em;
+  color: var(--falu-red);
+}  
+
+#navbar-search-btn:hover {
+  transform: scale(1.1); 
+  background-color: var(--orange-pantone); 
+  color: #fff;
+}
+
+.navbar-search-input:focus {
+  background-color: #fff; 
+  color: #000; 
+}
+
+.navbar-avatar {
+  width: 35px;        
+  height: 35px;         
+  border-radius: 50%;   
+  object-fit: cover;    
+  border: 2px solid #fff; 
+  display: block;       
+  margin: 0;            
+}
+
+/* ---------------- NAVBAR ICONS ---------------- */
+.icon-btn.cart-btn,
+.icon-btn.star-btn {
+  background: transparent;   
+  border: none;              
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.icon-btn.navbar-icon-btn {
+  padding-right: 9px;
+  padding-bottom: 4px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.bi.bi-box-arrow-right {
+  padding: 0;
+}
+
+/* Tamaño del icono dentro del botón */
+.icon-btn.cart-btn i,
+.icon-btn.star-btn i,
+.bi.bi-box-arrow-right {
+  color: #ffffff !important; 
+  font-size: 1.2rem;    
+}
+
+/* Hover */
+.icon-btn.cart-btn:hover,
+.icon-btn.star-btn:hover,
+.icon-btn.navbar-icon-btn:hover {
+  transform: scale(1.1);
+  background-color: transparent;
+}
+
+/* Logo en navbar */
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-logo {
+  width: 100px;            
+  height: 100px;           
+  border-radius: 50%;     
+  object-fit: cover;      
+  border: 2px solid #fff; 
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo-link:hover .navbar-logo {
+  transform: scale(1.05); 
+}
+
+/* Página productos searchbox */
+.search-input {
+  width: 400px;
+  max-width: 100%;
+  height: 45px;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  border: 1px solid var(--gray);
+}
+
+/* Botones al lado del searchbox */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--gray);
+  background: #fff;
+  cursor: pointer;
+  height: 45px;
+  width: 45px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.icon-btn i {
+  font-size: 1.2rem;
+  color: var(--orange-pantone);
+}
+
+.icon-btn:hover {
+  background-color: var(--jasmine);
+}
+
+/* ------------------ Producto ------------------ */
+.product-card {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+  border: 1px solid var(--gray);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-img {
+  object-fit: cover;
+  width: 100%;
+  height: 200px;
+  border-radius: 15px;
+  padding: 0.7em;
+  background-color: var(--maize);
+}
+
+/* Vista lista */
+.products-container.list-view .product-item {
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  display: flex;
+  justify-content: center;
+}
+
+.products-container.list-view .product-card {
+  display: flex !important;
+  flex-direction: row;
+  width: 90%;
+  text-align: left;
+}
+
+.products-container.list-view .product-img {
+  width: 200px;
+  height: auto;
+  object-fit: cover;
+  margin-right: 20px;
+  border-radius: 15px 0 0 15px;
+}
+
+.products-container.list-view .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ------------------ Formulario de búsqueda de productos ------------------ */
+.products-search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+}
+
+.products-search-form .search-input {
+  width: 800px; 
+  height: 55px;
+  padding: 10px 15px;
+  font-size: 1.1rem;
+  margin-left: 3em;
+  border: 1px solid var(--gray);
+  border-radius: 25px 8px 8px 25px;
+  outline: none;
+}
+
+.products-search-form .icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 55px; 
+  width: 55px; 
+  border-radius: 8px;
+  border: 1px solid var(--gray);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.products-search-form .icon-btn i {
+  font-size: 1.2rem;
+  color: var(--orange-pantone);
+}
+
+.product-search-btn {
+    background-color: var(--orange-pantone); /* o el color base que prefieras */
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.product-search-btn:hover {
+    background-color: var(--gray); /* gris de tu paleta */
+    transform: scale(1.05);
 }

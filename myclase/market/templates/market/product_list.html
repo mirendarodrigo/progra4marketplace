@@ -1,26 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h2 class="text-dark">Productos</h2>
-<ul class="list-group">
+<h2 class="text-dark mb-4">Productos</h2>
+
+<div class="d-flex justify-content-center align-items-center mb-4 search-container">
+  <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form">
+    <input type="text" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ request.GET.q }}">
+    <button type="button" class="btn icon-btn me-2 search-btn" title="Buscar">
+        <i class="bi bi-search"></i>
+    </button>
+    <button type="button" class="btn icon-btn me-2 filter-btn" title="Filtrar / Ordenar">
+        <i class="bi bi-funnel"></i>
+    </button>
+    <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
+        <i class="bi bi-list-ul"></i>
+    </button>
+  </form>
+</div>
+
+<div class="row products-container grid-view">
   {% for p in products %}
-    <li class="list-group-item" >
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <strong>{{ p.title }}</strong> — $ {{ p.price }}  
-          <p class="mb-1 text-muted">Marca: {{ p.marca }}</p>
-          <small class="text-secondary">
-            Descripción: {{ p.description}}
-          </small><br>
+    <div class="col-md-4 mb-4 product-item">
+      <div class="card product-card">
+        <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.title }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ p.title }}</h5>
+          <p class="card-text text-muted">Marca: {{ p.marca }}</p>
+          <p class="card-text">{{ p.description }}</p>
+          <p class="card-price">${{ p.price }}</p>
           <small class="text-secondary">
             Publicado por {{ p.seller.get_full_name|default:p.seller.username }}
           </small>
         </div>
       </div>
-    </li>
-  {% empty %}
-    <li class="text-dark">No hay productos aún.</li>
+    </div>
   {% endfor %}
-</ul>
-{% endblock %}
+</div>
 
+{% endblock %}

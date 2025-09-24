@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
 {% load socialaccount %}
-{% block title %}Mercadito · Tu marketplace simple{% endblock %}
+
 
 {% block content %}
 <div class="container py-5">
   <div class="d-flex flex-column flex-lg-row align-items-stretch gap-5">
 
     <!-- Carrusel izquierdo -->
-    <div class="flex-fill" style="max-width: 55%;">
+    <div class="flex-fill carrusel-container">
       <div id="infoCarousel" class="carousel slide h-100" data-bs-ride="carousel">
         <div class="carousel-inner h-100">
 
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Panel derecho: login / acciones -->
-    <div class="flex-fill d-flex justify-content-center" style="max-width: 45%;">
+    <div class="flex-fill d-flex justify-content-center login-container">
       <div class="p-4 border rounded shadow-sm bg-light h-100 d-flex flex-column justify-content-center align-items-center text-center">
         {% if not user.is_authenticated %}
           <h2 class="fw-bold text-dark mb-3">Bienvenido a <span class="text-primary">Mercadito</span></h2>
@@ -69,52 +69,12 @@
           </div>
         {% else %}
           <h2 class="fw-bold text-dark mb-3">¡Hola, {{ user.first_name }}!</h2>
-          <a class="btn btn-primary btn-lg mb-2" href="{% url 'product_list' %}">Explorar productos</a>
-          <a class="btn btn-outline-secondary btn-lg ms-2" href="{% url 'add_product' %}">Publicar un producto</a>
+          <a class="btn btn-primary btn-lg mb-2" href="{% url 'market:product_list' %}">Explorar productos</a>
+          <a class="btn btn-outline-secondary btn-lg ms-2" href="{% url 'market:add_product' %}">Publicar un producto</a>
         {% endif %}
       </div>
     </div>
 
   </div>
 </div>
-
-<style>
-/* Quitar borde y resaltar en botones del carousel */
-.custom-carousel-btn:focus,
-.custom-carousel-btn:active {
-  outline: none;
-  box-shadow: none;
-  border: none;
-}
-
-/* Tamaño de iconos */
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  width: 3rem;
-  height: 3rem;
-}
-
-/* Carrusel: imagen consistente y tamaño fijo para evitar saltos */
-.object-fit-cover {
-  object-fit: cover;
-}
-
-/* Asegurar que el carrusel ocupe todo el alto del contenedor */
-#infoCarousel, 
-#infoCarousel .carousel-inner, 
-#infoCarousel .carousel-item,
-#infoCarousel img {
-  height: 100%;
-}
-
-/* Ajustar caption para ocupar todo el alto */
-.carousel-caption {
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-</style>
 {% endblock %}

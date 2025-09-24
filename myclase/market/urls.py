@@ -3,7 +3,10 @@ from django.contrib import admin
 from django.urls import path, include
 from .views import product_list, add_product
 from . import views
+from django.conf.urls.static import static
 
+
+app_name = "market"
 urlpatterns = [
     path("add/", add_product, name="add_product"),
     path("", product_list, name="product_list")

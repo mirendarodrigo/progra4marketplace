@@ -3,18 +3,25 @@ from .models import Product
 from .forms import ProductForm
 
 def product_list(request):
+    query = request.GET.get("q")
     products = Product.objects.filter(active=True).order_by("-created_at")
-    return render(request, "market/product_list.html", {"products": products})
 
+    if query:
+        products = products.filter(title__icontains=query) | products.filter(description__icontains=query)
+
+    return render(request, "market/product_list.html", {
+        "products": products,
+        "query": query,
+    })
 
 def add_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
             product = form.save(commit=False)
-            product.seller = request.user   # el usuario logueado será el vendedor
+            product.seller = request.user
             product.save()
-            return redirect("product_list")  # redirigimos a la lista de productos
+            return redirect("market:product_list")  # 👈 corregido con namespace
     else:
         form = ProductForm()
     
