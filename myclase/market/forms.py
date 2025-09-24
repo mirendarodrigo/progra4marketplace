@@ -4,4 +4,18 @@ from .models import Product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["title", "description", "marca", "price", "active"]
+        
+        fields = ["title", "description", "marca", "price", "active", "image"]
+        
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control"}),
+            "marca": forms.TextInput(attrs={"class": "form-control"}),
+            "price": forms.NumberInput(attrs={"class": "form-control"}),
+            "active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            # widget del campo image con id y aceptando solo imágenes
+            "image": forms.ClearableFileInput(attrs={
+                "id": "id_image",
+                "accept": "image/*"
+            }),
+        }

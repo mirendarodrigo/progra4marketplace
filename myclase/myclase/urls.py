@@ -11,6 +11,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('productos/', include('market.urls')),
     path('market/', include('market.urls')),
+    path('chat/', include('chat.urls')),
 ]
 
 # Archivos estáticos y media solo en desarrollo

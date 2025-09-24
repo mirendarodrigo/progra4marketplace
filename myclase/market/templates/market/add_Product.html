@@ -1,13 +1,68 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="text-dark">Agregar Producto</h2>
+<div class="add-product-container">
+  <h2 class="title">
+    {% if form.instance.pk %}Editar Producto{% else %}Agregar Producto{% endif %}
+  </h2>
 
-<form class="form-label" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Guardar</button>
-</form>
+  <form method="post" enctype="multipart/form-data" class="add-product-form">
+    {% csrf_token %}
 
-<a href="{% url 'market:product_list' %}">Volver a la lista</a>
+    <!-- Imagen arriba con botón -->
+    <div class="image-upload-group">
+      <div class="image-preview-wrapper">
+        <img id="imagePreview"
+             src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}{{ MEDIA_URL }}products/placeholder.png{% endif %}"
+             data-placeholder="{{ MEDIA_URL }}products/placeholder.png"
+             alt="Preview imagen"
+             class="image-preview">
+      </div>
+
+      <!-- Botón estilizado -->
+      <button type="button" id="selectImageBtn" class="btn select-image-btn">
+        Seleccionar Imagen
+      </button>
+
+      <!-- Input oculto -->
+      {{ form.image }}
+    </div>
+
+    <!-- Inputs debajo -->
+    <div class="form-inputs">
+      <div class="form-group">
+        <label for="id_title">Título</label>
+        {{ form.title }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description">Descripción</label>
+        {{ form.description }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_marca">Marca</label>
+        {{ form.marca }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_price">Precio</label>
+        {{ form.price }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_active">Activo</label>
+        {{ form.active }}
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="submit" class="btn save-btn">
+        {% if form.instance.pk %}Guardar cambios{% else %}Agregar{% endif %}
+      </button>
+      <a href="{% url 'market:product_list' %}" class="btn cancel-btn">Volver a la lista</a>
+    </div>
+  </form>
+</div>
 {% endblock %}

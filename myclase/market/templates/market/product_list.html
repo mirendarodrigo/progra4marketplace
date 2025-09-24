@@ -6,8 +6,8 @@
 
 <div class="d-flex justify-content-center align-items-center mb-4 search-container">
   <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form">
-    <input type="text" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ request.GET.q }}">
-    <button type="button" class="btn icon-btn me-2 search-btn" title="Buscar">
+    <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ request.GET.q }}">
+    <button id="searchbtn" type="button" class="btn icon-btn me-2 search-btn" title="Buscar">
         <i class="bi bi-search"></i>
     </button>
     <button type="button" class="btn icon-btn me-2 filter-btn" title="Filtrar / Ordenar">

@@ -199,6 +199,7 @@
 }
 
 /* Botones al lado del searchbox */
+
 .icon-btn {
   display: flex;
   align-items: center;
@@ -212,14 +213,22 @@
   transition: background-color 0.2s ease-in-out;
 }
 
+
 .icon-btn i {
   font-size: 1.2rem;
   color: var(--orange-pantone);
 }
 
-.icon-btn:hover {
+.btn.icon-btn.toggle-view-btn:hover {
   background-color: var(--jasmine);
 }
+.btn.icon-btn.me-2.filter-btn:hover{
+  background-color: var(--jasmine);
+}
+.btn.icon-btn.me-2.search-btn:hover{
+  background-color: var(--jasmine);
+}
+
 
 /* ------------------ Producto ------------------ */
 .product-card {
@@ -320,4 +329,130 @@
 .product-search-btn:hover {
     background-color: var(--gray); /* gris de tu paleta */
     transform: scale(1.05);
+}
+
+
+/* -------------------Add_PRoduct----------------------------------- */
+
+.add-product-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background-color: var(--maize);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.title {
+  color: var(--orange-pantone);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+.image-upload-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.image-preview-wrapper {
+  width: 100%;
+  max-width: 350px;
+  height: 350px;
+  border: 1px solid var(--gray);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.select-image-btn {
+  background-color: var(--orange-pantone);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.select-image-btn:hover {
+  background-color: var(--falu-red);
+}
+
+/* Ocultar el input file real */
+#id_image {
+  display: none;
+}
+
+.form-inputs .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-inputs label {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--falu-red);
+}
+
+.form-inputs input,
+.form-inputs textarea,
+.form-inputs select {
+  background-color: #fff; /* fondo claro */
+  color: #000; /* letra oscura */
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-inputs textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.save-btn {
+  background-color: var(--orange-pantone);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-btn:hover {
+  background-color: var(--falu-red);
+}
+
+.cancel-btn {
+  background-color: var(--jasmine);
+  color: #000;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: var(--maize);
 }
