@@ -1,7 +1,24 @@
 from pathlib import Path
 import environ
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 env = environ.Env(DEBUG=(bool, True))
-environ.Env.read_env()  # lee .env si existe
+
+# Leer archivo .env
+environ.Env.read_env(BASE_DIR / ".env")
+
+# Variables
+DEBUG = env("DEBUG")
+SECRET_KEY = env("SECRET_KEY")
+MERCADOPAGO_ACCESS_TOKEN = env('MERCADOPAGO_ACCESS_TOKEN')
+
+# DEBUG: verificar que se está leyendo correctamente
+print("💡 Token env MP:", MERCADOPAGO_ACCESS_TOKEN)
+
+
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY", default="dev-secret-no-usar-en-prod")
