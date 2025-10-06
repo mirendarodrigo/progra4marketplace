@@ -13,6 +13,7 @@ urlpatterns = [
     path('productos/', include('market.urls')),
     path('market/', include('market.urls')),
     path('chat/', include('chat.urls')),
+    path('scanner/', include('scanner.urls')),
     path("crear-preferencia/", views.crear_preferencia, name="crear_preferencia"),
 ]
 

@@ -18,7 +18,21 @@ class Product(models.Model):
     blank=True,
     null=True,
     default="products/placeholder.png"
-)
+)   
+    # codigo de barras 
+    barcode = models.CharField(
+        max_length=13,  # 13 para cubrir códigos EAN-13
+        blank=True,
+        default="0000000000000"
+    )
+
+    # stock
+    stock = models.CharField(
+        max_length=3,
+        blank=True,
+        default="1"
+    )
+
 
     
     created_at = models.DateTimeField(auto_now_add=True)
