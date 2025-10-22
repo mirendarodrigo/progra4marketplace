@@ -5,7 +5,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         
-        fields = ["title", "description", "marca", "price", "active", "image"]
+        fields = ["title", "description", "marca", "price", "active", "image","barcode","stock",]
         
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
@@ -18,4 +18,13 @@ class ProductForm(forms.ModelForm):
                 "id": "id_image",
                 "accept": "image/*"
             }),
+            "barcode": forms.TextInput(attrs={
+               "class": "form-control",
+               "placeholder": "Ej: 0000000000000"
+           }),
+            "stock": forms.NumberInput(attrs={
+               "class": "form-control",
+               "min": "0",
+               "placeholder": "Cantidad disponible"
+           }),
         }

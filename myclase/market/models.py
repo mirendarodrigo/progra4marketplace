@@ -12,31 +12,29 @@ class Product(models.Model):
     marca = models.CharField(max_length=100, blank=True, default="Generico")
     price = models.DecimalField(max_digits=12, decimal_places=2)
     
-    # Imagen del producto
     image = models.ImageField(
-    upload_to="products/",  
-    blank=True,
-    null=True,
-    default="products/placeholder.png"
-)   
-    # codigo de barras 
+        upload_to="products/",  
+        blank=True,
+        null=True,
+        default="products/placeholder.png"
+    )   
+    
     barcode = models.CharField(
-        max_length=13,  # 13 para cubrir códigos EAN-13
+        max_length=13,  
         blank=True,
         default="0000000000000"
     )
 
-    # stock
-    stock = models.CharField(
-        max_length=3,
+    stock = models.IntegerField(
         blank=True,
-        default="1"
+        default=1
     )
 
-
-    
     created_at = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
+
+    source = models.CharField(max_length=100, blank=True, default="Coto")  # supermercado
+    query = models.CharField(max_length=100, blank=True, null=True)  # término de búsqueda
 
     def __str__(self):
         return self.title

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "perfil",
     "chat",
     "scanner",
+    "dashboard",
 
 ]
 
@@ -123,7 +124,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-   "https://petite-incl-mobility-permitted.trycloudflare.com"
+   "https://filling-lined-timber-inherited.trycloudflare.com"
 ]
 
 

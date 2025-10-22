@@ -1,0 +1,104 @@
+/* Estilos para el scanner */
+#scanner-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 2rem auto;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+#result {
+  text-align: center;
+  font-size: 1.5rem;
+  margin: 1rem 0;
+  color: var(--orange-pantone);
+  font-weight: 600;
+}
+
+/* Modal */
+#modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--maize);
+  padding: 2rem;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-content h4 {
+  color: var(--orange-pantone);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.modal-content p {
+  margin: 0.5rem 0;
+  color: var(--falu-red);
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.modal-btn {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.modal-btn-primary {
+  background-color: var(--orange-pantone);
+  color: #fff;
+}
+
+.modal-btn-primary:hover {
+  background-color: var(--falu-red);
+  transform: translateY(-2px);
+}
+
+.modal-btn-secondary {
+  background-color: var(--jasmine);
+  color: #000;
+}
+
+.modal-btn-secondary:hover {
+  background-color: var(--maize);
+  transform: translateY(-2px);
+}
+
+/* Contenedor del scanner page */
+.scanner-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.scanner-page h2 {
+  text-align: center;
+  color: var(--orange-pantone);
+  margin-bottom: 1rem;
+}

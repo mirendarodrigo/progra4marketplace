@@ -2,9 +2,7 @@
 
 {% block content %}
 <div class="add-product-container">
-  <h2 class="title">
-    {% if form.instance.pk %}Editar Producto{% else %}Agregar Producto{% endif %}
-  </h2>
+  <h2 class="title">Agregar Producto</h2>
 
   <form method="post" enctype="multipart/form-data" class="add-product-form">
     {% csrf_token %}
@@ -51,6 +49,25 @@
       </div>
 
       <div class="form-group">
+        <label for="id_barcode">Código de Barras</label>
+        <div class="barcode-group">
+          {{ form.barcode }}
+          <button type="button" class="barcode-scan-btn" onclick="window.location.href='{% url 'scanner:scan' %}'">
+            📷 Escanear
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_stock">Stock</label>
+        <div class="stock-group">
+          <button type="button" class="stock-btn" onclick="decrementStock()">−</button>
+          {{ form.stock }}
+          <button type="button" class="stock-btn" onclick="incrementStock()">+</button>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="id_active">Activo</label>
         {{ form.active }}
       </div>
@@ -58,9 +75,8 @@
 
     <!-- Botones -->
     <div class="form-actions">
-      <button type="submit" class="btn save-btn">
-        {% if form.instance.pk %}Guardar cambios{% else %}Agregar{% endif %}
-      </button>
+      <button type="submit" class="btn save-btn">Agregar</button>
+      <a href="{% url 'scanner:scan' %}" class="btn scanner-btn">🔍 Ir al Scanner</a>
       <a href="{% url 'market:product_list' %}" class="btn cancel-btn">Volver a la lista</a>
     </div>
   </form>

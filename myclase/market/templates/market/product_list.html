@@ -40,54 +40,46 @@
 </div>
 
 <!-- Modal de Detalle del Producto -->
+<!-- Modal de Detalle del Producto -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content product-modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title modal-title-custom" id="productModalLabel">
-          <i class="bi bi-box-seam"></i> Detalle del Producto
-        </h5>
-        <button type="button" class="btn-close btn-close-custom" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="productModalLabel">Detalle del Producto</h5>
+        <button  class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="row">
+        <div>
           <!-- Imagen del producto -->
-          <div class="col-md-6">
-            <div class="modal-image-wrapper">
-              <img id="modal-product-image" src="" class="img-fluid modal-product-img" alt="Producto">
-            </div>
+          <div class="modal-image-wrapper">
+            <img id="modal-product-image" src="" class="img-fluid modal-product-img" alt="Producto">
           </div>
           
           <!-- Información del producto -->
-          <div class="col-md-6 modal-info-section">
-            <h3 id="modal-product-title" class="modal-product-title"></h3>
-            
-            <div class="modal-product-brand mb-2">
-              <i class="bi bi-tag"></i>
+          <div class="modal-info-section">
+            <h3 id="modal-product-title"></h3>
+            <p class="text-muted mb-2">
               <strong>Marca:</strong> <span id="modal-product-marca"></span>
-            </div>
-            
-            <div class="modal-product-price-wrapper mb-3">
-              <span class="modal-product-price">$<span id="modal-product-price"></span></span>
-            </div>
-            
-            <div class="modal-product-description mb-4">
-              <p id="modal-product-description"></p>
-            </div>
+            </p>
+            <h4 class="text-primary mb-3">
+              $<span id="modal-product-price"></span>
+            </h4>
+            <p id="modal-product-description" class="mb-4"></p>
             
             <div class="seller-info mb-4">
-              <i class="bi bi-person-circle"></i> 
-              <span class="seller-label">Vendido por:</span> 
-              <span id="modal-product-seller" class="seller-name"></span>
+              <small class="text-secondary">
+                <i class="bi bi-person-circle"></i> 
+                Publicado por: <span id="modal-product-seller"></span>
+              </small>
             </div>
             
             <!-- Botones de acción -->
-            <div class="modal-actions d-flex gap-2">
-              <button type="button" class="btn favorite-btn flex-fill" id="modal-favorite-btn">
-                <i class="bi bi-star"></i> <span>Favoritos</span>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-warning  favorite-btn" id="modal-favorite-btn">
+                <i class="bi bi-star"></i> Favoritos
               </button>
-              <button type="button" class="btn cart-btn flex-fill" id="modal-cart-btn">
-                <i class="bi bi-cart-plus"></i> <span>Agregar al Carrito</span>
+              <button type="button" class="btn btn-primary  cart-btn" id="modal-cart-btn">
+                <i class="bi bi-cart-plus"></i> Agregar al Carrito
               </button>
             </div>
           </div>

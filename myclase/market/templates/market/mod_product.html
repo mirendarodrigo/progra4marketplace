@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="add-product-container">
+  <h2 class="title">Modificar Producto</h2>
+
+  <form method="post" enctype="multipart/form-data" class="add-product-form">
+    {% csrf_token %}
+
+    <!-- Imagen arriba con botón -->
+    <div class="image-upload-group">
+      <div class="image-preview-wrapper">
+        <img id="imagePreview"
+             src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}{{ MEDIA_URL }}products/placeholder.png{% endif %}"
+             data-placeholder="{{ MEDIA_URL }}products/placeholder.png"
+             alt="Preview imagen"
+             class="image-preview">
+      </div>
+
+      <!-- Botón estilizado -->
+      <button type="button" id="selectImageBtn" class="btn select-image-btn">
+        Cambiar Imagen
+      </button>
+
+      <!-- Input oculto -->
+      {{ form.image }}
+    </div>
+
+    <!-- Inputs debajo -->
+    <div class="form-inputs">
+      <div class="form-group">
+        <label for="id_title">Título</label>
+        {{ form.title }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description">Descripción</label>
+        {{ form.description }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_marca">Marca</label>
+        {{ form.marca }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_price">Precio</label>
+        {{ form.price }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_barcode">Código de Barras</label>
+        <div class="barcode-group">
+          {{ form.barcode }}
+          <button type="button" class="barcode-scan-btn" onclick="window.location.href='{% url 'scanner:scan' %}'">
+            📷 Escanear
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_stock">Stock</label>
+        <div class="stock-group">
+          <button type="button" class="stock-btn" onclick="decrementStock()">−</button>
+          {{ form.stock }}
+          <button type="button" class="stock-btn" onclick="incrementStock()">+</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_active">Activo</label>
+        {{ form.active }}
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="submit" class="btn save-btn">Guardar Cambios</button>
+      <a href="{% url 'market:product_list' %}" class="btn cancel-btn">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+
+{% endblock %}

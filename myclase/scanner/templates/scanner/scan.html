@@ -4,6 +4,20 @@
 {% block content %}
 <h2>Escanear código de barras</h2>
 <div id="scanner-container" style="width: 100%; max-width: 400px; margin: auto;"></div>
+<div id="modal" style="
+    display:none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    z-index: 1000;
+    text-align: center;
+">
+</div>
 
 <p><strong>Código detectado:</strong> <span id="result">Ninguno</span></p>
 

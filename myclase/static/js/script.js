@@ -205,11 +205,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
+            
             <!DOCTYPE html>
             <html>
             <head>
                 <title>Presupuesto - LocalMarket</title>
                 <meta charset="utf-8">
+                <link rel="icon" type="image/png" href="myclase/static/img/fav.png">
             </head>
             <body>
                 ${budgetHTML}
@@ -625,6 +627,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ==================== ADD/MOD PRODUCT - PREVIEW DE IMAGEN ====================
+    
     const selectImageBtn = document.getElementById("selectImageBtn");
     const imageInput = document.getElementById("id_image");
     const imagePreview = document.getElementById("imagePreview");
@@ -647,6 +651,40 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // ==================== ADD/MOD PRODUCT - CONTROLES DE STOCK ====================
+    
+    const stockInput = document.getElementById('id_stock');
+    
+    // Funciones globales para los botones inline en HTML
+    window.incrementStock = function() {
+        if (stockInput) {
+            let currentValue = parseInt(stockInput.value) || 0;
+            stockInput.value = currentValue + 1;
+        }
+    }
+
+    window.decrementStock = function() {
+        if (stockInput) {
+            let currentValue = parseInt(stockInput.value) || 0;
+            if (currentValue > 0) {
+                stockInput.value = currentValue - 1;
+            }
+        }
+    }
+
+    // ==================== ADD PRODUCT - CÓDIGO DE BARRAS DESDE URL ====================
+    
+    const barcodeInput = document.getElementById('id_barcode');
+    if (barcodeInput) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const barcodeParam = urlParams.get('barcode');
+        if (barcodeParam) {
+            barcodeInput.value = barcodeParam;
+        }
+    }
+    
+    // ==================== UTILIDADES ====================
     
     function getCookie(name) {
         let cookieValue = null;
@@ -662,4 +700,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return cookieValue;
     }
+});
+
+// Dropdown del usuario
+document.addEventListener("DOMContentLoaded", () => {
+  const avatarBtn = document.getElementById("userAvatarBtn");
+  const userDropdown = document.getElementById("userDropdown");
+
+  if (avatarBtn && userDropdown) {
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle("show");
+    });
+
+    // Cerrar al hacer click fuera
+    document.addEventListener("click", (e) => {
+      if (!userDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+        userDropdown.classList.remove("show");
+      }
+    });
+  }
 });

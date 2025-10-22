@@ -15,6 +15,9 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path('scanner/', include('scanner.urls')),
     path("crear-preferencia/", views.crear_preferencia, name="crear_preferencia"),
+    path('dashboard/', include('dashboard.urls')),
+    
+    
 ]
 
 # Archivos estáticos y media solo en desarrollo

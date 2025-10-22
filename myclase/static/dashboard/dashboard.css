@@ -1,0 +1,42 @@
+:root {
+  --orange-pantone: #f56416ff;
+  --falu-red: #772014ff;
+  --gray: #7c7c7cff;
+  --jasmine: #ffd97dff;
+  --maize: #fff689ff;
+}
+
+ h2{
+color: var(--falu-red) ;
+margin: 2px auto;
+}
+
+.datosCard{
+  border-bottom: 2px inset rgba(245, 100, 22, 0.411);
+  border-radius: 20px;
+}
+.datoTitulo{
+  color: black !important;
+  font-weight: bold;
+}
+
+.datoDetail {
+  color: var(--gray) !important;
+}
+.datoPrecio{
+  color: var(--falu-red) !important;
+  font-weight: bolder;
+}
+
+.completada{
+  font-weight: bold;
+  color: rgb(5, 82, 5)!important;
+}
+.pendiente{
+  font-weight: bold;
+  color: rgb(129, 131, 12)!important;
+}
+.cancelada{
+  font-weight: bold;
+  color: rgb(173, 9, 4)!important;
+}
