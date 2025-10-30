@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load socialaccount %}
 {% load static %}
 
 {% block content %}
@@ -10,19 +10,38 @@
         <img src="{% static 'img/default-avatar.png' %}" alt="Avatar por defecto" class="avatar-img">
     </div>
 
+    {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <form method="post" class="login-form">
         {% csrf_token %}
+        
         <div class="form-group">
-            <label for="id_username">Usuario</label>
-            <input type="text" name="username" id="id_username" required>
+            <label for="{{ form.login.id_for_label }}">Usuario o Email</label>
+            {{ form.login }}
+            {% if form.login.errors %}
+                <span class="error">{{ form.login.errors }}</span>
+            {% endif %}
         </div>
 
         <div class="form-group">
-            <label for="id_password">Contraseña</label>
-            <input type="password" name="password" id="id_password" required>
+            <label for="{{ form.password.id_for_label }}">Contraseña</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <span class="error">{{ form.password.errors }}</span>
+            {% endif %}
         </div>
 
         <button type="submit" class="btn">Ingresar</button>
     </form>
+
+    <p>
+        ¿No tienes cuenta? <a href="{% url 'account_signup' %}">Regístrate aquí</a>
+    </p>
 </div>
 {% endblock %}

@@ -1,18 +1,251 @@
 {% extends "base.html" %}
+{% load socialaccount %}
+{% load static %}
 {% block title %}Registrarse{% endblock %}
 
 {% block content %}
-<h2>Registrarse</h2>
+<style>
+  .signup-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Crear cuenta</button>
-</form>
+  .signup-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+  }
 
-<p>O registrate con:</p>
-<a href="{% provider_login_url 'google' %}"><img src="/static/google-logo.png" width="30"> Google</a>
-<a href="{% provider_login_url 'github' %}"><img src="/static/github-logo.png" width="30"> GitHub</a>
+  .avatar-section {
+    text-align: center;
+    margin-bottom: 30px;
+  }
 
-<p>¿Ya tenés cuenta? <a href="{% url 'account_login' %}">Entrar</a></p>
+  .avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    margin-bottom: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .avatar-input-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .avatar-input-wrapper input[type="file"] {
+    display: none;
+  }
+
+  .avatar-input-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: 500;
+  }
+
+  .avatar-input-label:hover {
+    background: #0056b3;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input[type="text"]:focus,
+  .form-group input[type="email"]:focus,
+  .form-group input[type="password"]:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+  }
+
+  .errorlist {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .errorlist li {
+    list-style: none;
+    margin: 5px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .submit-btn:hover {
+    background: #218838;
+  }
+
+  .divider {
+    text-align: center;
+    margin: 25px 0;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .social-login {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.3s;
+    font-size: 13px;
+  }
+
+  .social-btn:hover {
+    background: #f0f0f0;
+    border-color: #999;
+  }
+
+  .social-btn img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .login-link a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="signup-container">
+  <h2>Crear tu cuenta</h2>
+
+  <div class="avatar-section">
+    <img id="avatarPreview" src="{% static 'img/default-avatar.png' %}" alt="Avatar" class="avatar-preview">
+    <div class="avatar-input-wrapper">
+      <input type="file" id="avatarInput" accept="image/*">
+      <label for="avatarInput" class="avatar-input-label">Seleccionar foto</label>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="signup-form">
+    {% csrf_token %}
+
+    {% for field in form %}
+      {% if field.name != 'avatar' %}
+        <div class="form-group">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}
+            {{ field.errors }}
+          {% endif %}
+          {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <button type="submit" class="submit-btn">Crear cuenta</button>
+  </form>
+
+  <div class="divider">O regístrate con:</div>
+
+  <div class="social-login">
+    <a href="{% provider_login_url 'google' %}" class="social-btn">
+      <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google">
+      Google
+    </a>
+    <a href="{% provider_login_url 'github' %}" class="social-btn">
+      <img src="https://img.icons8.com/glyph-neue/48/github.png" alt="GitHub">
+      GitHub
+    </a>
+  </div>
+
+  <div class="login-link">
+    ¿Ya tenés cuenta? <a href="{% url 'account_login' %}">Entra aquí</a>
+  </div>
+</div>
+
+<script>
+  const avatarInput = document.getElementById('avatarInput');
+  const avatarPreview = document.getElementById('avatarPreview');
+
+  avatarInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        avatarPreview.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
 {% endblock %}

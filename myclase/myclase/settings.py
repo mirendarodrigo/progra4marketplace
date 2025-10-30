@@ -133,3 +133,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 
+# Email configuration (desarrollo)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Allauth - No requiere verificación de email en desarrollo
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'optional', 'mandatory', 'none'
+ACCOUNT_EMAIL_REQUIRED = False
