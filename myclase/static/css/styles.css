@@ -1108,8 +1108,9 @@
   border-radius: 15px 15px 0 0;
   padding: 1rem;
   background: linear-gradient(135deg, var(--maize) 0%, var(--jasmine) 100%);
-}
 
+}
+ 
 .product-card .card-body {
   padding: 1.2rem;
   display: flex;
