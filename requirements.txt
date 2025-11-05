@@ -6,10 +6,12 @@ cffi==1.17.1
 charset-normalizer==3.4.3
 chromedriver-autoinstaller==0.6.4
 cryptography==45.0.6
+dj-database-url==3.0.1
 Django==5.2.5
 django-allauth==65.11.1
 django-environ==0.12.0
 git-filter-repo==2.47.0
+gunicorn==23.0.0
 h11==0.16.0
 idna==3.10
 mercadopago==2.3.0
@@ -18,6 +20,7 @@ outcome==1.3.0.post0
 packaging==25.0
 pandas==2.3.3
 pillow==11.3.0
+psycopg2-binary==2.9.11
 pycparser==2.22
 PyJWT==2.10.1
 PySocks==1.7.1
@@ -39,4 +42,5 @@ tzdata==2025.2
 urllib3==2.5.0
 webdriver-manager==4.0.2
 websocket-client==1.9.0
+whitenoise==6.11.0
 wsproto==1.2.0
