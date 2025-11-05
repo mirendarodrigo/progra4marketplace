@@ -1774,7 +1774,8 @@
 /* Contenedor de carrito */
 .cart-container {
   position: relative;
-}
+   max-height: 300px;
+ }
 
 /* Dropdown del Carrito */
 .cart-dropdown {
