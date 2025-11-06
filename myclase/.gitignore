@@ -1,7 +1,10 @@
-.env
+
+
 pycache/
 *.pyc
 db.sqlite3
 .env
 *.log
 /staticfiles/
+
+

@@ -209,10 +209,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <!DOCTYPE html>
             <html>
             <head>
+                <link rel="icon" type="image/png" href="/static/img/fav.png">
                 <title>Presupuesto - LocalMarket</title>
                 <meta charset="utf-8">
-                <link rel="icon" type="image/png" href="myclase/static/img/fav.png">
-            </head>
+                </head>
             <body>
                 ${budgetHTML}
                 <div style="text-align: center; margin-top: 20px;">

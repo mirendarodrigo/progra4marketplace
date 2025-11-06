@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load socialaccount %}
 {% load static %}
 {% block title %}Registrarse{% endblock %}
 
@@ -217,16 +216,7 @@
 
   <div class="divider">O regístrate con:</div>
 
-  <div class="social-login">
-    <a href="{% provider_login_url 'google' %}" class="social-btn">
-      <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google">
-      Google
-    </a>
-    <a href="{% provider_login_url 'github' %}" class="social-btn">
-      <img src="https://img.icons8.com/glyph-neue/48/github.png" alt="GitHub">
-      GitHub
-    </a>
-  </div>
+ 
 
   <div class="login-link">
     ¿Ya tenés cuenta? <a href="{% url 'account_login' %}">Entra aquí</a>
