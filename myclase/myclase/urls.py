@@ -16,6 +16,7 @@ urlpatterns = [
     path('scanner/', include('scanner.urls')),
     path("crear-preferencia/", views.crear_preferencia, name="crear_preferencia"),
     path('dashboard/', include('dashboard.urls')),
+    path('perfil/', include('profiles.urls', namespace='profiles'))
     
     
 ]

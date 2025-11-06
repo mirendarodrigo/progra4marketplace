@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     # Apps propias
     "core",
     "market",
-    "perfil",
+    "profiles",
     "chat",
     "scanner",
     "dashboard",
