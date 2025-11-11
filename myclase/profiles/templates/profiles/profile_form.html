@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Mi perfil{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-lg-8">
+  <div class="col-12 col-xl-10">
     <div class="card p-4 p-md-5">
-      <div class="d-flex align-items-center justify-content-between mb-3">
+
+      <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
           <h1 class="h4 mb-1">
             {% if mode == 'staff_preview' %}
@@ -16,7 +18,7 @@
           </h1>
           <div class="text-muted">
             {% if mode == 'staff_preview' %}
-              Campos vacíos, sólo lectura. Ingresá con una cuenta de usuario para editar.
+              Campos en solo lectura.
             {% else %}
               Completá tus datos y guardá los cambios.
             {% endif %}
@@ -24,79 +26,106 @@
         </div>
       </div>
 
-      <form method="post" enctype="multipart/form-data" novalidate>
+      <form method="post" enctype="multipart/form-data" novalidate autocomplete="off">
         {% csrf_token %}
 
         <div class="row g-4">
-          <!-- Columna avatar -->
-          <div class="col-md-4 text-center">
-            <div class="mb-3">
-              {% if mode == 'user_edit' and pform.instance.foto %}
-                <img id="avatarPreview" src="{{ pform.instance.foto.url }}" class="avatar" alt="Foto de perfil">
-              {% else %}
-                <img id="avatarPreview" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|urlencode }}&size=256" class="avatar" alt="Foto">
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Foto de perfil</label>
-              {{ pform.foto }}
-              {% for e in pform.foto.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-            </div>
-            {% if mode == 'user_edit' and pform.instance.foto %}
-              <a href="{% url 'profiles:delete_photo' %}" class="btn btn-outline-danger btn-soft btn-sm">Borrar foto</a>
-            {% endif %}
-          </div>
-
-          <!-- Columna datos -->
-          <div class="col-md-8">
+          <!-- IZQUIERDA: Datos -->
+          <div class="col-lg-8">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">Nombre</label>
+                <label class="form-label" for="{{ uform.first_name.id_for_label }}">Nombre</label>
                 {{ uform.first_name }}
-                {% for e in uform.first_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in uform.first_name.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
+
               <div class="col-md-6">
-                <label class="form-label">Apellido</label>
+                <label class="form-label" for="{{ uform.last_name.id_for_label }}">Apellido</label>
                 {{ uform.last_name }}
-                {% for e in uform.last_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in uform.last_name.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Teléfono</label>
+                <label class="form-label" for="{{ pform.telefono.id_for_label }}">Teléfono</label>
                 {{ pform.telefono }}
-                {% for e in pform.telefono.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in pform.telefono.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
+
               <div class="col-md-6">
-                <label class="form-label">Localidad</label>
+                <label class="form-label" for="{{ pform.localidad.id_for_label }}">Localidad</label>
                 {{ pform.localidad }}
-                {% for e in pform.localidad.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in pform.localidad.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
 
               <div class="col-12">
-                <label class="form-label">Dirección</label>
+                <label class="form-label" for="{{ pform.direccion.id_for_label }}">Dirección</label>
                 {{ pform.direccion }}
-                {% for e in pform.direccion.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in pform.direccion.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
 
               <div class="col-12">
-                <label class="form-label">Datos personales</label>
+                <label class="form-label" for="{{ pform.datos_personales.id_for_label }}">Datos personales</label>
                 {{ pform.datos_personales }}
-                {% for e in pform.datos_personales.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                {% for e in pform.datos_personales.errors %}
+                  <div class="text-danger small">{{ e }}</div>
+                {% endfor %}
               </div>
             </div>
+          </div>
+
+          <!-- DERECHA: Foto -->
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <!-- Preview con IMG (más robusto que background-image) -->
+                <div class="rounded-3 border mx-auto" style="width:180px; height:180px; overflow:hidden; background:#fff;">
+                  <img id="avatarPreviewImg"
+                       src="{{ user_avatar_url }}"
+                       alt="Foto de perfil"
+                       style="width:100%; height:100%; object-fit:cover; object-position:center; display:block;">
+                </div>
+              </div>
+            </div>
+
+            {% if mode != 'staff_preview' %}
+              <!-- input oculto -->
+              <input type="file" id="profile-photo-input" name="foto" accept="image/*" style="display:none;">
+
+              <div class="d-grid gap-2 mt-3">
+                <label for="profile-photo-input" class="btn btn-outline-primary mb-0" style="cursor:pointer;">
+                  Cambiar foto
+                </label>
+                {% if pform.instance.foto %}
+                  <a href="{% url 'profiles:delete_photo' %}" class="btn btn-outline-danger">Borrar foto</a>
+                {% endif %}
+              </div>
+
+              <div class="text-center mt-2">
+                <small id="selectedFileName" class="text-muted" style="display:none;"></small>
+              </div>
+            {% else %}
+              <div class="alert alert-info mb-0 text-center mt-3">Sólo lectura</div>
+            {% endif %}
           </div>
         </div>
 
         {% if mode != 'staff_preview' %}
           <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary btn-soft px-4">Guardar cambios</button>
-          </div>
-        {% else %}
-          <div class="alert alert-info mt-4 mb-0">
-            Estás viendo una previsualización (admin). No se puede guardar desde aquí.
+            <button type="submit" class="btn btn-primary px-4">Guardar cambios</button>
           </div>
         {% endif %}
       </form>
+
     </div>
   </div>
 </div>
@@ -104,14 +133,71 @@
 
 {% block scripts %}
 <script>
-  // Preview de imagen al seleccionar archivo
-  const fileInput = document.getElementById('{{ pform.foto.id_for_label }}');
-  const preview   = document.getElementById('avatarPreview');
-  if (fileInput && preview) {
-    fileInput.addEventListener('change', (e) => {
-      const [file] = e.target.files || [];
-      if (file) preview.src = URL.createObjectURL(file);
+// Preview instantáneo (preview + navbar) SIN depender del orden de carga
+(function () {
+  function applyPreviewURL(url) {
+    try {
+      var img = document.getElementById('avatarPreviewImg');
+      if (img) {
+        img.src = url;
+        img.onload = function(){ try { URL.revokeObjectURL(url); } catch(_){} };
+      }
+      var nav = document.getElementById('navbarAvatarImg');
+      if (nav) {
+        nav.src = url;
+        nav.onload = function(){ try { URL.revokeObjectURL(url); } catch(_){} };
+      }
+    } catch(_) {}
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    var nameEl = document.getElementById('selectedFileName');
+    if (nameEl) { nameEl.textContent = file.name; nameEl.style.display = 'inline'; }
+    var url = URL.createObjectURL(file);
+    applyPreviewURL(url);
+  }
+
+  // delegación para change del input
+  document.addEventListener('change', function(e){
+    var t = e.target;
+    if (!t || t.id !== 'profile-photo-input') return;
+    var file = t.files && t.files[0];
+    handleFile(file);
+  });
+
+  // permitir re-seleccionar el mismo archivo
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var forAttr = t && t.getAttribute && t.getAttribute('for');
+    if ((t && t.id === 'profile-photo-input') || forAttr === 'profile-photo-input') {
+      var input = document.getElementById('profile-photo-input');
+      if (input) input.value = null;
+    }
+  });
+
+  // drag & drop sobre el contenedor del IMG
+  var img = document.getElementById('avatarPreviewImg');
+  var container = img ? img.parentElement : null;
+  if (container) {
+    ['dragenter', 'dragover'].forEach(function(ev){
+      container.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); container.classList.add('border-primary'); });
+    });
+    ['dragleave', 'drop'].forEach(function(ev){
+      container.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); container.classList.remove('border-primary'); });
+    });
+    container.addEventListener('drop', function(e){
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!f) return;
+      var input = document.getElementById('profile-photo-input');
+      if (input) {
+        var dt = new DataTransfer();
+        dt.items.add(f);
+        input.files = dt.files;
+      }
+      handleFile(f);
     });
   }
+})();
 </script>
 {% endblock %}

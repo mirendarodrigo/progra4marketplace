@@ -3,7 +3,16 @@ from django.db import models
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.core.validators import RegexValidator
+from django.apps import AppConfig
 import os
+
+class ProfilesConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "profiles"
+
+    def ready(self):
+        # importa señales a la carga
+        import profiles.signals  # noqa
 
 def profile_photo_path(instance, filename):
     # media/profiles/user_<id>/<filename>
