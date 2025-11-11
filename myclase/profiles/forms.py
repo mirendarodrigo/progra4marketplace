@@ -1,3 +1,4 @@
+# profiles/forms.py
 from django import forms
 from django.contrib.auth import get_user_model
 from .models import Profile
@@ -30,5 +31,6 @@ class ProfileForm(forms.ModelForm):
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Calle 123'}),
             'localidad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tu ciudad'}),
             'datos_personales': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notas, bio, etc.'}),
-            'foto': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            # ⬇ FileInput + id estable (coincide con el JS del template)
+            'foto': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'profile-photo-input'}),
         }

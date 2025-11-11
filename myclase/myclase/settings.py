@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     # Apps propias
     "core",
     "market",
-    "profiles",
+    'profiles.apps.PerfilConfig',
     "chat",
     "scanner",
     "dashboard",
@@ -95,6 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "market.context_processors.user_avatar",
+                'profiles.context_processors.avatar',
             ],
         },
     },
