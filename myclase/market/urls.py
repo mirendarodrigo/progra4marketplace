@@ -10,6 +10,6 @@ app_name = "market"
 urlpatterns = [
     path("add/", add_product, name="add_product"),
     path("", product_list, name="product_list"),
-     path("search/", views.search_products, name="search_products"),
+    path("search/", views.search_products, name="search_products"),
     path('<int:product_id>/modificar/', views.mod_product, name='mod_product'),
 ]
