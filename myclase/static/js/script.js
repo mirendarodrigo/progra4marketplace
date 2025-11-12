@@ -610,22 +610,46 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const filterBtn = document.querySelector('.filter-btn');
-    if (filterBtn) {
-        filterBtn.addEventListener('click', () => {
-            alert("Función de filtros aún no implementada");
-        });
-    }
+    // === BÚSQUEDA Y VISTAS (CON ORDENAMIENTO) ===
 
     const searchBtn = document.getElementById("searchbtn");
     const searchBox = document.getElementById("searchbox");
-    if (searchBtn && searchBox) {
-        searchBtn.addEventListener("click", () => {
-            const query = searchBox.value.trim();
-            const url = query ? `?q=${encodeURIComponent(query)}` : window.location.pathname;
-            window.location.href = url;
-        });
+    const sortOptions = document.getElementById("sortOptions"); // ID del nuevo <select>
+
+    // Función unificada que lee AMBOS campos y recarga la página
+    function performSearchAndSort() {
+        // Salir si los elementos no están en la página
+        if (!searchBox || !sortOptions) return; 
+
+        const query = searchBox.value.trim();
+        const sortValue = sortOptions.value;
+        
+        // Usamos URLSearchParams para construir la URL de forma segura
+        const params = new URLSearchParams();
+        
+        if (query) {
+            params.append('q', query);
+        }
+        
+        // Siempre añadimos el 'sort', incluso si es el de por defecto
+        params.append('sort', sortValue);
+
+        const queryString = params.toString();
+        
+        // Recargamos la página en la misma ruta pero con los nuevos parámetros
+        window.location.href = window.location.pathname + '?' + queryString;
     }
+
+    // 1. Asignamos la función al botón de búsqueda
+    if (searchBtn) {
+        searchBtn.addEventListener("click", performSearchAndSort);
+    }
+
+    // 2. Asignamos la MISMA función a cuando el usuario cambia el orden
+    if (sortOptions) {
+        sortOptions.addEventListener("change", performSearchAndSort);
+    }
+
 
     // ==================== ADD/MOD PRODUCT - PREVIEW DE IMAGEN ====================
     

@@ -1,4 +1,38 @@
-# PROGRA-IV-C2-2025
+# PROGRAMACIÓN IV
+## 2° Cuatrimestre - 2025
+
+## GRUPO 3
+### Integrantes
+* Mirenda, Rodrigo - Project Manager
+* Vadalá, Franco - Collaborator
+* Cabral, Cristian - Collaborator
+
+**Mercadito:** Proyecto de sitio web de compraventa de artículos desarrollado en **Python** con el framework **Django**, con futuro deploy mediante render.com.
+
+### Características principales
+* Registro de usuarios mediante **Google** y **GitHub**
+* Manejo de perfiles individuales
+* Función de escáner de **Código de barras**
+* Función de **Lista de deseados**
+* Envío de **Presupuesto** mediante e-mail
+* Chat de Telegram dentro del sitio para comunicación entre vendedor y comprador
+* Realización de pagos a través de la plataforma de **MercadoPago**
+
+### Instalación local
+Asegúrese de ejecutar la siguiente lista de comandos para evitar posibles errores y dejar funcional el programa:
+`pip install virtualenv`
+`git clone https://github.com/mirendarodrigo/progra4marketplace`
+`virtualenv env`
+`venv\Scripts\activate`
+`pip install -r requirements.txt`
+`python manage.py migrate`
+`python manage.py makemigrations`
+
+
+
+=================================================================
+
+
 DATOS DE PROGRAMAS DJANGO
 
 <img width="893" height="477" alt="image" src="https://github.com/user-attachments/assets/97d58dec-d994-4a55-9275-5050d5ae98d8" />
