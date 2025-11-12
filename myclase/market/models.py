@@ -11,6 +11,7 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     marca = models.CharField(max_length=100, blank=True, default="Generico")
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    category = models.TextField(max_length=50, blank=True, default= "Varios")
     
     image = models.ImageField(
         upload_to="products/",  

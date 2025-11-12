@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chat{% endblock %}
+
+{% block content %}
+<style>
+  :root{
+    --bg: #f8f9fb;
+    --card: #ffffff;
+    --border: #e9ecef;
+    --text: #212529;
+    --muted: #6c757d;
+    --bubble: #f5f6f8;
+    --bubble-me: #e7f1ff;
+    --primary: var(--bs-primary);
+    --accent: #e9ecef;
+  }
+  .chat-header{
+    background: var(--card);
+    border:1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.04);
+    margin-bottom: 14px;
+  }
+  .chat-header .title{ font-weight:700; display:flex; align-items:center; gap:10px; }
+  .chat-header .pill{ background: var(--accent); padding: 4px 10px; border-radius:999px; font-size:.85rem; }
+
+  .chat-layout{ display:grid; grid-template-columns: 320px 1fr; gap:16px; height: calc(100vh - 220px); }
+  .chat-side, .chat-room{
+    background: var(--card); border:1px solid var(--border); border-radius:12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.04);
+  }
+
+  .side-head{ padding:12px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .side-list{ max-height: 100%; overflow:auto; }
+  .list-group-item{ border:0; border-bottom:1px solid var(--border); }
+  .list-group-item:last-child{ border-bottom:0; }
+  .list-group-item.active{ background:#f1f3f9; color: inherit; }
+
+  .room-top{ border-bottom:1px solid var(--border); padding: 12px 16px; display:flex; align-items:center; gap:12px; }
+  .room-top .avatar{
+    width:40px; height:40px; border-radius:8px; background:#eef2ff; color:#4055b5; display:flex; align-items:center; justify-content:center; font-weight:800;
+    border:1px solid var(--border);
+  }
+  .msgs{ height: 100%; overflow:auto; padding: 16px; background: var(--bg); border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
+  .msg{ margin-bottom:12px; display:flex; }
+  .msg.me{ justify-content: flex-end; }
+  .bubble{ background: var(--bubble); padding:10px 12px; border-radius: 10px; max-width: 75%; }
+  .msg.me .bubble{ background: var(--bubble-me); }
+  .bubble small{ display:block; color: var(--muted); margin-top: 6px; }
+  .attach{ margin-top:8px; }
+  .attach img, .attach video, .attach audio{ max-width: 360px; border-radius: 8px; border:1px solid var(--border); display:block; }
+
+  .composer{ padding: 12px; background: var(--card); border-top:1px solid var(--border); border-bottom-left-radius:12px; border-bottom-right-radius:12px; }
+  .composer .form-control{ height:44px; border-radius:10px; }
+  .btn-attach{ height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; width:100%; }
+  .btn-send{ height:44px; border-radius:10px; width:100%; }
+  @media (max-width: 992px){ .chat-layout{ grid-template-columns: 1fr; height:auto; } }
+</style>
+
+<div class="chat-header">
+  <div class="title">
+    <span class="pill">Mensajes</span>
+    <span>Centro de conversaciones</span>
+  </div>
+</div>
+
+<div id="chatRoot"
+     class="chat-layout"
+     data-convo-id="{{ conversation.id }}"
+     data-last-id="{% firstof messages.last.id 0 %}">
+  <!-- Sidebar -->
+  <aside class="chat-side d-flex flex-column">
+    <div class="side-head">
+      <h6 class="mb-0">Tus conversaciones</h6>
+      <span class="badge text-bg-light text-dark">{{ conversations|length }}</span>
+    </div>
+    <div class="side-list">
+      <div class="list-group list-group-flush">
+        {% for c in conversations %}
+          <a class="list-group-item list-group-item-action {% if c.id == conversation.id %}active{% endif %}"
+             href="{% url 'chat:room' c.id %}">
+            <div class="d-flex align-items-center gap-2">
+              <div class="rounded bg-light border px-2 py-1 fw-bold text-primary">
+                {% for u in c.participants.all %}{% if u.id != request.user.id %}{{ u.username|slice:":2"|upper }}{% endif %}{% endfor %}
+              </div>
+              <div>
+                {% for u in c.participants.all %}
+                  {% if u.id != request.user.id %}
+                    <div class="fw-semibold">{{ u.get_full_name|default:u.username }}</div>
+                  {% endif %}
+                {% endfor %}
+                <div class="small text-muted">#{{ c.id }}</div>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="p-3 text-muted">Todavía no tenés conversaciones</div>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sala -->
+  <section class="chat-room d-flex flex-column">
+    <div class="room-top">
+      <div class="avatar">
+        {% for u in conversation.participants.all %}{% if u.id != request.user.id %}{{ u.username|slice:":2"|upper }}{% endif %}{% endfor %}
+      </div>
+      <div>
+        <div class="fw-bold">
+          {% for u in conversation.participants.all %}
+            {% if u.id != request.user.id %}
+              {{ u.get_full_name|default:u.username }}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="text-muted small">Conversación #{{ conversation.id }}</div>
+      </div>
+    </div>
+
+    <div id="msgs" class="msgs">
+      {% for m in messages %}
+        <div class="msg {% if m.sender_id == request.user.id %}me{% endif %}" data-id="{{ m.id }}">
+          <div class="bubble">
+            {% if m.text %}<div>{{ m.text|linebreaksbr }}</div>{% endif %}
+            {% if m.attachment %}
+              {% with url=m.attachment.url|lower %}
+                <div class="attach">
+                  {% if url|slice:"-4:" == ".jpg" or url|slice:"-5:" == ".jpeg" or url|slice:"-4:" == ".png" or url|slice:"-4:" == ".gif" or url|slice:"-5:" == ".webp" %}
+                    <img src="{{ m.attachment.url }}" alt="imagen">
+                  {% elif url|slice:"-4:" == ".mp4" or url|slice:"-5:" == ".webm" or url|slice:"-4:" == ".ogv" or url|slice:"-4:" == ".ogg" %}
+                    <video src="{{ m.attachment.url }}" controls></video>
+                  {% elif url|slice:"-4:" == ".mp3" or url|slice:"-4:" == ".wav" or url|slice:"-4:" == ".m4a" or url|slice:"-4:" == ".ogg" %}
+                    <audio src="{{ m.attachment.url }}" controls></audio>
+                  {% else %}
+                    <a href="{{ m.attachment.url }}" target="_blank" rel="noopener">Descargar adjunto</a>
+                  {% endif %}
+                </div>
+              {% endwith %}
+            {% endif %}
+            <small>por {{ m.sender.get_full_name|default:m.sender.username }} • {{ m.created_at|date:"d/m H:i" }}</small>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-center text-muted">Aún no hay mensajes.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Composer -->
+    <form id="composerForm" class="composer" method="post" enctype="multipart/form-data" action="{% url 'chat:api_send' conversation.id %}">
+      {% csrf_token %}
+      <div class="row g-2 align-items-center">
+        <div class="col-lg-8 col-md-12">
+          <input type="text" name="text" class="form-control" placeholder="Escribí tu mensaje...">
+        </div>
+
+        <!-- Botón de clip para adjuntos -->
+        <div class="col-lg-2 col-md-6">
+          <input type="file" id="attachInput" name="attachment" accept="image/*,video/*,audio/*" class="visually-hidden">
+          <label for="attachInput" class="btn btn-outline-secondary btn-attach">
+            <i class="bi bi-paperclip"></i> Adjuntar
+          </label>
+        </div>
+
+        <!-- Enviar -->
+        <div class="col-lg-2 col-md-6">
+          <button class="btn btn-primary btn-send" type="submit">
+            <i class="bi bi-send"></i> Enviar
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+(function(){
+  const root = document.getElementById('chatRoot');
+  const msgsEl = document.getElementById('msgs');
+  const form = document.getElementById('composerForm');
+  const convoId = root?.dataset.convoId;
+  let lastId = parseInt(root?.dataset.lastId || "0", 10) || 0;
+
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  };
+
+  const scrollToBottom = () => { if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight; };
+
+  function renderMessage(m){
+    const wrap = document.createElement('div');
+    wrap.className = 'msg' + (m.is_me ? ' me' : '');
+    wrap.dataset.id = m.id;
+
+    let attachHTML = '';
+    if (m.attachment_url) {
+      if (m.attachment_kind === 'image') {
+        attachHTML = `<div class="attach"><img src="${m.attachment_url}" alt="imagen"></div>`;
+      } else if (m.attachment_kind === 'video') {
+        attachHTML = `<div class="attach"><video src="${m.attachment_url}" controls></video></div>`;
+      } else if (m.attachment_kind === 'audio') {
+        attachHTML = `<div class="attach"><audio src="${m.attachment_url}" controls></audio></div>`;
+      } else {
+        attachHTML = `<div class="attach"><a href="${m.attachment_url}" target="_blank" rel="noopener">Descargar adjunto</a></div>`;
+      }
+    }
+
+    wrap.innerHTML = `
+      <div class="bubble">
+        ${m.text ? `<div>${m.text.replace(/\n/g,'<br>')}</div>` : ''}
+        ${attachHTML}
+        <small>por ${m.sender_name} • ${m.created_at}</small>
+      </div>
+    `;
+    return wrap;
+  }
+
+  async function fetchNew(){
+    try{
+      const r = await fetch(`/chat/api/messages/${convoId}/?after=${lastId}`, {headers: {'Accept':'application/json'}});
+      if(!r.ok) return;
+      const data = await r.json();
+      if(!data.messages || !data.messages.length) return;
+
+      data.messages.forEach(m => {
+        const node = renderMessage(m);
+        msgsEl.appendChild(node);
+        lastId = Math.max(lastId, m.id);
+      });
+      scrollToBottom();
+    }catch(e){ }
+  }
+  setInterval(fetchNew, 3000);
+
+  if(form){
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      btn?.setAttribute('disabled', 'disabled');
+
+      const fd = new FormData(form);
+      try{
+        const r = await fetch(form.action, {
+          method: 'POST',
+          headers: {'X-CSRFToken': getCookie('csrftoken')},
+          body: fd
+        });
+        const data = await r.json();
+        if(data.ok){
+          const node = renderMessage(data.message);
+          msgsEl.appendChild(node);
+          lastId = Math.max(lastId, data.message.id);
+          form.reset();
+          scrollToBottom();
+        }
+      }catch(e){
+      }finally{
+        btn?.removeAttribute('disabled');
+      }
+    });
+  }
+
+  scrollToBottom();
+})();
+</script>
+{% endblock %}

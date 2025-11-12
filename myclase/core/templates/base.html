@@ -15,10 +15,11 @@
   <link rel="stylesheet" href="{% static 'chat/chat.css' %}">
   <link rel="stylesheet" href="{% static 'scanner/scanner.css' %}">
   <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
-  
+
 </head>
 
 <body class="bg-dark-subtle text-dark">
+  
 <nav class="container-fluid d-flex justify-content-between align-items-center px-3 py-1">
   <!-- Logo (Izquierda) -->
   <div class="contenedorLogo">
@@ -27,15 +28,26 @@
     </a>
   </div>
 
-  <!-- Searchbox (Centro) - Solo si NO estamos en la página de productos -->
-  {% if not request.path == '/productos/' %}
-  <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
-    <input name="q" class="form-control navbar-search-input me-2" placeholder="Buscar productos..." aria-label="Search">
-    <button id="navbar-search-btn" type="submit" class="icon-btn">
-      <i class="bi bi-search"></i>
-    </button>
-  </form>
-  {% endif %}
+  <nav class="container-fluid d-flex justify-content-between align-items-center px-3 py-1">
+    <!-- Logo (Izquierda) -->
+    <div class="contenedorLogo">
+      <a href="{% url 'home' %}" class="navbar-logo-link">
+        <img src="{% static 'img/logo.png' %}" alt="LocalMarket Logo" class="navbar-logo">
+      </a>
+    </div>
+
+
+    <!-- Searchbox (Centro) - Solo si NO estamos en la página de productos -->
+    {% if not request.path == '/productos/' %}
+    <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
+      <input name="q" class="form-control navbar-search-input me-2" placeholder="Buscar productos..."
+        aria-label="Search">
+      <button id="navbar-search-btn" type="submit" class="icon-btn">
+        <i class="bi bi-search"></i>
+      </button>
+    </form>
+    {% endif %}
+
 
   <!-- Iconos de usuario (Derecha) -->
     {% if request.path == '/' and user.is_authenticated %}
@@ -50,59 +62,82 @@
     <img src="{{ user_avatar_url }}" alt="Avatar" class="navbar-avatar">
   </button>
 
-  <!-- Dropdown del usuario -->
-  <div class="user-dropdown" id="userDropdown">
-    <a href="/dashboard" class="user-dropdown-item">
-      <i class="bi bi-bar-chart-line"></i> Dashboard
-    </a>
-  </div>
-</li>
+    <!-- Iconos de usuario (Derecha) -->
+    {% if request.path == '/' and user.is_authenticated %}
+    <h2 class="fw-bold text-dark mb-3">¡Hola, {{ user.first_name }}!</h2>
+    {%endif%}
+    <ul class="d-flex align-items-center gap-2 mb-0">
+      {% if user.is_authenticated %}
+      <!-- Avatar -->
+      <!-- Avatar interactivo con dropdown -->
+      <li id="userButton" class="position-relative user-avatar-container">
+        <button class="icon-btn avatar-btn" id="userAvatarBtn" title="Usuario">
+          <img src="{{ user_avatar_url }}" alt="Avatar" class="navbar-avatar">
+        </button>
 
-      
+        <!-- Dropdown del usuario -->
+        <div class="user-dropdown" id="userDropdown">
+
+          <a href="/dashboard" class="user-dropdown-item">
+            <i class="bi bi-bar-chart-line"></i> Dashboard
+          </a>
+
+          <a href="{% url 'profiles:edit' %}" class="user-dropdown-item">
+            <i class="bi bi-person-circle"></i> Mi perfil
+          </a>
+
+          <a href="{% url 'chat:inbox' %}" class="user-dropdown-item">
+            <i class="bi bi-chat-dots"></i> Chat
+          </a>
+
+        </div>
+      </li>
+
+
       <!-- Carrito -->
       <li class="position-relative cart-container">
-  <button class="icon-btn cart-btn" id="cartToggle" title="Carrito">
-    <i class="bi bi-cart3"></i>
-    <span class="notification-badge cart-badge d-none" id="cartBadge">0</span>
-  </button>
-  
-  <!-- Dropdown del Carrito -->
-  <div class="cart-dropdown" id="cartDropdown">
-    <div class="cart-header">
-      <h6 class="mb-0">
-        <i class="bi bi-cart3"></i> Mi Carrito
-      </h6>
-      <button class="btn-clear-cart" id="btnClearCart" title="Vaciar carrito">
-        <i class="bi bi-trash"></i>
-      </button>
-    </div>
-    
-    <div class="cart-list" id="cartList">
-      <div class="empty-cart">
-        <i class="bi bi-cart-x"></i>
-        <p>Tu carrito está vacío</p>
-      </div>
-    </div>
-    
-    <div class="cart-footer d-none" id="cartFooter">
-      <div class="cart-total">
-        <span class="cart-total-label">Total:</span>
-        <span class="cart-total-amount" id="cartTotalAmount">$0.00</span>
-      </div>
-      <button class="btn btn-checkout" id="btnCheckout">
-        <i class="bi bi-credit-card"></i> Realizar Compra
-      </button>
-    </div>
-  </div>
-</li>
-      
+        <button class="icon-btn cart-btn" id="cartToggle" title="Carrito">
+          <i class="bi bi-cart3"></i>
+          <span class="notification-badge cart-badge d-none" id="cartBadge">0</span>
+        </button>
+
+        <!-- Dropdown del Carrito -->
+        <div class="cart-dropdown" id="cartDropdown">
+          <div class="cart-header">
+            <h6 class="mb-0">
+              <i class="bi bi-cart3"></i> Mi Carrito
+            </h6>
+            <button class="btn-clear-cart" id="btnClearCart" title="Vaciar carrito">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+
+          <div class="cart-list" id="cartList">
+            <div class="empty-cart">
+              <i class="bi bi-cart-x"></i>
+              <p>Tu carrito está vacío</p>
+            </div>
+          </div>
+
+          <div class="cart-footer d-none" id="cartFooter">
+            <div class="cart-total">
+              <span class="cart-total-label">Total:</span>
+              <span class="cart-total-amount" id="cartTotalAmount">$0.00</span>
+            </div>
+            <button class="btn btn-checkout" id="btnCheckout">
+              <i class="bi bi-credit-card"></i> Realizar Compra
+            </button>
+          </div>
+        </div>
+      </li>
+
       <!-- Favoritos con Dropdown -->
       <li class="position-relative favorites-container">
         <button class="icon-btn star-btn" id="favoritesToggle" title="Favoritos">
           <i class="bi bi-star"></i>
           <span class="notification-badge favorites-badge d-none" id="favoritesBadge">0</span>
         </button>
-        
+
         <!-- Dropdown de Favoritos -->
         <div class="favorites-dropdown" id="favoritesDropdown">
           <div class="favorites-header">
@@ -113,14 +148,14 @@
               <i class="bi bi-calculator"></i>
             </button>
           </div>
-          
+
           <div class="favorites-list" id="favoritesList">
             <div class="empty-favorites">
               <i class="bi bi-star"></i>
               <p>No tienes favoritos aún</p>
             </div>
           </div>
-          
+
           <div class="budget-actions d-none" id="budgetActions">
             <button class="btn btn-sm btn-cancel-budget" id="btnCancelBudget">
               <i class="bi bi-x"></i> Cancelar
@@ -131,22 +166,22 @@
           </div>
         </div>
       </li>
-      
+
       <!-- Logout -->
       <li>
         <a href="{% url 'account_logout' %}" class="icon-btn navbar-icon-btn" title="Salir">
           <i class="bi bi-box-arrow-right"></i>
         </a>
       </li>
-    {% else %}
+      {% else %}
       <li>
         <a href="{% url 'account_login' %}">
-          <img width="30" height="30" src="https://img.icons8.com/cute-clipart/30/enter-2.png" alt="Ingresar"/>
+          <img width="30" height="30" src="https://img.icons8.com/cute-clipart/30/enter-2.png" alt="Ingresar" />
         </a>
       </li>
-    {% endif %}
-  </ul>
-</nav>
+      {% endif %}
+    </ul>
+  </nav>
 
   <main class="container"> {% block content %}{% endblock %} </main>
   

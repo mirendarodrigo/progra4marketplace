@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mensajes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center p-5 rounded-4 border bg-white">
+    <h3 class="mb-2">Centro de conversaciones</h3>
+    <p class="text-muted mb-4">Todavía no tenés conversaciones.</p>
+    <a class="btn btn-primary" href="{% url 'market:product_list' %}">
+      Ir a la tienda
+    </a>
+  </div>
+</div>
+{% endblock %}
