@@ -820,6 +820,81 @@ window.incrementStock = function () {
     }
 }
 
+    // === BÚSQUEDA Y VISTAS (CON ORDENAMIENTO) ===
+
+    const searchBtn = document.getElementById("searchbtn");
+    const searchBox = document.getElementById("searchbox");
+    const sortOptions = document.getElementById("sortOptions"); // ID del nuevo <select>
+
+    // Función unificada que lee AMBOS campos y recarga la página
+    function performSearchAndSort() {
+        // Salir si los elementos no están en la página
+        if (!searchBox || !sortOptions) return; 
+
+        const query = searchBox.value.trim();
+        const sortValue = sortOptions.value;
+        
+        // Usamos URLSearchParams para construir la URL de forma segura
+        const params = new URLSearchParams();
+        
+        if (query) {
+            params.append('q', query);
+        }
+        
+        // Siempre añadimos el 'sort', incluso si es el de por defecto
+        params.append('sort', sortValue);
+
+        const queryString = params.toString();
+        
+        // Recargamos la página en la misma ruta pero con los nuevos parámetros
+        window.location.href = window.location.pathname + '?' + queryString;
+    }
+
+    // 1. Asignamos la función al botón de búsqueda
+    if (searchBtn) {
+        searchBtn.addEventListener("click", performSearchAndSort);
+    }
+
+    // 2. Asignamos la MISMA función a cuando el usuario cambia el orden
+    if (sortOptions) {
+        sortOptions.addEventListener("change", performSearchAndSort);
+    }
+
+
+    // ==================== ADD/MOD PRODUCT - PREVIEW DE IMAGEN ====================
+    
+    const selectImageBtn = document.getElementById("selectImageBtn");
+    const imageInput = document.getElementById("id_image");
+    const imagePreview = document.getElementById("imagePreview");
+
+    if(selectImageBtn && imageInput && imagePreview){
+        selectImageBtn.addEventListener("click", () => {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onload = function(ev){
+                    imagePreview.src = ev.target.result;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = imagePreview.dataset.placeholder || "";
+            }
+        });
+    }
+
+    // ==================== ADD/MOD PRODUCT - CONTROLES DE STOCK ====================
+    
+    const stockInput = document.getElementById('id_stock');
+    
+    // Funciones globales para los botones inline en HTML
+    window.incrementStock = function() {
+        if (stockInput) {
+            let currentValue = parseInt(stockInput.value) || 0;
+            stockInput.value = currentValue + 1;
 window.decrementStock = function () {
     if (stockInput) {
         let currentValue = parseInt(stockInput.value) || 0;

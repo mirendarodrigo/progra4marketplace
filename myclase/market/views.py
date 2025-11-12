@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .scraper import scrape_coto
 import mercadopago
 import json
+from django.db.models import Q
 from profiles.models import Profile
 from django.contrib.auth import get_user_model   
 
@@ -55,15 +56,40 @@ def crear_preferencia(request):
 
 def product_list(request):
     query = request.GET.get("q")
-    products = Product.objects.filter(active=True).order_by("-created_at")
+    sort_by = request.GET.get("sort", "recent")
 
+    # 1. Empezar con el filtro base (SIN ordenar)
+    products = Product.objects.filter(active=True)
+
+    # 2. Aplicar el filtro de BÚSQUEDA (si existe)
     if query:
-        products = products.filter(title__icontains=query) | products.filter(description__icontains=query)
+        products = products.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )
 
+    # 3. Definir las opciones de ordenamiento
+    sort_options = {
+        'recent': '-created_at',
+        'oldest': 'created_at',
+        'price_asc': 'price',
+        'price_desc': '-price',
+        'alpha': 'title',
+    }
+    
+    # 4. Obtener el campo de ordenamiento
+    order_field = sort_options.get(sort_by, '-created_at')
+
+    # 5. Aplicar el ORDENAMIENTO al FINAL de todo
+    products = products.order_by(order_field)
+
+    # 6. Enviar al template
     return render(request, "market/product_list.html", {
         "products": products,
-        "query": query,
+        "query": query,          # 'query' para rellenar el input
+        "current_sort": sort_by, # 'current_sort' para seleccionar la opción del menú
     })
+
+
 def add_product(request):
     # Si viene un código por GET, lo tomamos
     barcode = request.GET.get("barcode", "")
@@ -86,6 +112,7 @@ def add_product(request):
 
     return render(request, "market/add_product.html", {"form": form})
 
+
 def mod_product(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     if request.method == 'POST':
@@ -96,6 +123,7 @@ def mod_product(request, product_id):
     else:
         form = ProductForm(instance=product)
     return render(request, 'market/mod_product.html', {'form': form})
+
 
 def search_products(request):
     query = request.GET.get("q", "")
@@ -156,5 +184,3 @@ def seller_api(request, pk):
         "products_count": qs.count(),
     }
     return JsonResponse(data)
-
-
