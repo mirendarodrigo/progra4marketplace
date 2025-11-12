@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
 
-app_name = 'chat'  # importante para usar namespaces en {% url %}
+app_name = "chat"
 
 urlpatterns = [
-    path('', views.chat_list, name='chat_list'),
-    path('<int:user_id>/', views.chat_room, name='chat_room'),
-    path('send/', views.send_message, name='send_message'),
+    path("", views.inbox, name="inbox"),
+    path("<int:convo_id>/", views.room, name="room"),
+    path("start/<int:user_id>/", views.start_chat, name="start"),
+    # --- API en “tiempo casi real” ---
+    path("api/messages/<int:convo_id>/", views.messages_since, name="messages_since"),
+    path("api/send/<int:convo_id>/", views.api_send, name="api_send"),
 ]
