@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .scraper import scrape_coto
 import mercadopago
 import json
+from profiles.models import Profile
+from django.contrib.auth import get_user_model   
 
 
 
@@ -129,5 +131,30 @@ def search_products(request):
     ]
     return JsonResponse(data, safe=False)
 
+def seller_api(request, pk):
+    """
+    Retorna JSON con datos del vendedor y su perfil:
+    { id, name, email, localidad, telefono, products_count }
+    """
+    User = get_user_model()
+    user = get_object_or_404(User, pk=pk)
+
+    # Obtener Profile si existe
+    profile = Profile.objects.filter(user_id=pk).first()
+
+    # Contar publicaciones (si tu Product tiene 'active', filtramos; si no, cuenta todo)
+    qs = Product.objects.filter(seller_id=pk)
+    if hasattr(Product, "active"):
+        qs = qs.filter(active=True)
+
+    data = {
+        "id": user.id,
+        "name": user.get_full_name() or user.username,
+        "email": user.email or "",
+        "localidad": getattr(profile, "localidad", "") if profile else "",
+        "telefono": getattr(profile, "telefono", "") if profile else "",
+        "products_count": qs.count(),
+    }
+    return JsonResponse(data)
 
 
