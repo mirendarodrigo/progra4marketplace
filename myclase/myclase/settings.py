@@ -106,15 +106,25 @@ WSGI_APPLICATION = "myclase.wsgi.application"
 # --------------------------------------------------------------------
 # BASE DE DATOS
 # --------------------------------------------------------------------
-# Usa SQLite en local si no hay DATABASE_URL
-DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=False
-    )
-}
 
+if DEBUG:
+    # Estamos en desarrollo (local), usamos SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    # Estamos en producción (Render), usamos la DATABASE_URL
+    # dj_database_url leerá automáticamente la variable de entorno DATABASE_URL
+    DATABASES = {
+        "default": dj_database_url.config(
+            # Forzamos SSL, es requerido por Render
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
 # --------------------------------------------------------------------
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # --------------------------------------------------------------------
