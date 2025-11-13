@@ -495,32 +495,96 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.appendChild(style);
     }
     
-    // ==================== MODAL DE PRODUCTO ====================
-    
+     // ==================== MODAL DE PRODUCTO ====================
+
     const productModal = document.getElementById('productModal');
     const productCards = document.querySelectorAll('.product-card');
 
     if (productModal && productCards.length > 0) {
         const modalInstance = new bootstrap.Modal(productModal);
-        
+
+        // Helper para abrir el modal de Vendedor (si querés usarlo desde el botón del modal)
+        function openSellerModalById(sellerId, sellerName) {
+            const modalEl = document.getElementById('sellerModal');
+            if (!modalEl || !sellerId) return;
+
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            const nameEl = document.getElementById('seller-name');
+            const emailEl = document.getElementById('seller-email');
+            const locEl = document.getElementById('seller-localidad');
+            const telEl = document.getElementById('seller-telefono');
+            const countEl = document.getElementById('seller-products-count');
+
+            if (nameEl) nameEl.textContent = sellerName || '—';
+            if (emailEl) emailEl.textContent = 'Cargando...';
+            if (locEl) locEl.textContent = 'Cargando...';
+            if (telEl) telEl.textContent = 'Cargando...';
+            if (countEl) countEl.textContent = '...';
+
+            modal.show();
+
+            // Ajustá el prefijo si tu ruta está namespaced (p.ej. /market/api/seller/)
+            fetch(`/api/seller/${sellerId}/`, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.ok ? r.json() : Promise.reject(r))
+                .then(data => {
+                    if (emailEl) emailEl.textContent = data.email || '—';
+                    if (locEl) locEl.textContent = data.localidad || '—';
+                    if (telEl) telEl.textContent = data.telefono || '—';
+                    if (countEl) countEl.textContent = (data.products_count != null) ? data.products_count : 0;
+                    if (nameEl && data.name) nameEl.textContent = data.name;
+                })
+                .catch(() => {
+                    if (emailEl) emailEl.textContent = '—';
+                    if (locEl) locEl.textContent = '—';
+                    if (telEl) telEl.textContent = '—';
+                    if (countEl) countEl.textContent = '0';
+                });
+        }
+
         productCards.forEach(card => {
-            card.addEventListener('click', function() {
-                const img = this.querySelector('.product-img').src;
-                const title = this.querySelector('.product-title').textContent.trim();
-                const marca = this.querySelector('.product-brand').textContent.replace('Marca:', '').trim();
-                const price = this.querySelector('.product-price').textContent.trim().replace('$', '');
-                const description = this.querySelector('.product-description').textContent.trim();
-                const seller = this.querySelector('.product-seller').textContent.trim();
-                
+            card.addEventListener('click', function () {
+                const img = this.querySelector('.product-img')?.src || '';
+                const title = (this.querySelector('.product-title')?.textContent || '').trim();
+                const marca = (this.querySelector('.product-brand')?.textContent || '')
+                    .replace('Marca:', '').trim();
+                const price = (this.querySelector('.product-price')?.textContent || '')
+                    .trim().replace('$', '');
+                const description = (this.querySelector('.product-description')?.textContent || '').trim();
+
+                // Obtener seller desde un botón dentro de la card (recomendado)
+                const cardSellerBtn = this.querySelector('button[data-seller-id]');
+                const sellerId = cardSellerBtn?.dataset.sellerId || '';
+                const sellerName = cardSellerBtn?.dataset.sellerName
+                    || (this.querySelector('.product-seller')?.textContent.trim() || '');
+
+                // ID "slug" del producto (para favoritos / chat)
                 const productId = title.toLowerCase().replace(/\s+/g, '-');
-                
-                document.getElementById('modal-product-image').src = img;
-                document.getElementById('modal-product-title').textContent = title;
-                document.getElementById('modal-product-marca').textContent = marca;
-                document.getElementById('modal-product-price').textContent = price;
-                document.getElementById('modal-product-description').textContent = description;
-                document.getElementById('modal-product-seller').textContent = seller;
-                
+
+                // Rellenar modal de producto
+                const elImg = document.getElementById('modal-product-image');
+                const elTitle = document.getElementById('modal-product-title');
+                const elMarca = document.getElementById('modal-product-marca');
+                const elPrice = document.getElementById('modal-product-price');
+                const elDesc = document.getElementById('modal-product-description');
+                const elSell = document.getElementById('modal-product-seller');
+
+                if (elImg) elImg.src = img;
+                if (elTitle) elTitle.textContent = title;
+                if (elMarca) elMarca.textContent = marca;
+                if (elPrice) elPrice.textContent = price;
+                if (elDesc) elDesc.textContent = description;
+                if (elSell) elSell.textContent = sellerName;
+
+                // Botón "Publicado por" dentro del modal (si lo tenés en el HTML con id="modal-seller-btn")
+                const sellerBtn = document.getElementById('modal-seller-btn');
+                if (sellerBtn) {
+                    sellerBtn.dataset.sellerId = sellerId;
+                    sellerBtn.dataset.sellerName = sellerName;
+                    sellerBtn.disabled = !sellerId;
+                    sellerBtn.onclick = () => openSellerModalById(sellerId, sellerName);
+                }
+
+                // Botón "Favoritos"
                 const modalFavBtn = document.getElementById('modal-favorite-btn');
                 if (modalFavBtn) {
                     modalFavBtn.dataset.productId = productId;
@@ -530,10 +594,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         marca: marca,
                         price: price,
                         image: img,
-                        seller: seller
+                        seller: sellerName
                     });
-                    
-                    const isFavorite = favorites.some(fav => fav.id === productId);
+
+                    const isFavorite = (typeof favorites !== 'undefined')
+                        ? favorites.some(fav => fav.id === productId)
+                        : false;
+
                     if (isFavorite) {
                         modalFavBtn.classList.add('active');
                         modalFavBtn.querySelector('i').className = 'bi bi-star-fill';
@@ -542,20 +609,109 @@ document.addEventListener("DOMContentLoaded", () => {
                         modalFavBtn.querySelector('i').className = 'bi bi-star';
                     }
                 }
-                
+
+                // Botón "Chatear con el vendedor" (id="modal-chat-btn" en el HTML del modal)
+                const chatBtn = document.getElementById('modal-chat-btn');
+                if (chatBtn) {
+                    chatBtn.dataset.sellerId = sellerId;
+                    chatBtn.dataset.productId = productId;
+                    chatBtn.dataset.productTitle = title;
+                    chatBtn.dataset.productPrice = price;
+                    chatBtn.dataset.productBrand = marca;
+
+                    chatBtn.disabled = !sellerId;
+                    chatBtn.onclick = () => {
+                        if (!sellerId) {
+                            if (typeof showNotification === 'function') {
+                                showNotification('No se pudo identificar al vendedor', 'warning');
+                            }
+                            return;
+                        }
+                        const params = new URLSearchParams({
+                            product: productId || '',
+                            title: chatBtn.dataset.productTitle || '',
+                            price: chatBtn.dataset.productPrice || '',
+                            brand: chatBtn.dataset.productBrand || ''
+                        });
+                        // Si tu app chat está namespaced bajo /chat/, esta ruta debe existir:
+                        // path('chat/start/<int:user_id>/', views.start_chat, name='start')
+                        window.location.href = `/chat/start/${sellerId}/?${params.toString()}`;
+                    };
+                }
+
                 modalInstance.show();
             });
         });
-    }
-    
+        
+
+
+        // ==================== MODAL DEL VENDEDOR (desde botón del modal) ====================
+        function openSellerModal(sellerId, sellerName) {
+            const modalEl = document.getElementById('sellerModal');
+            if (!modalEl) return;
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            const nameEl = document.getElementById('seller-name');
+            const emailEl = document.getElementById('seller-email');
+            const locEl = document.getElementById('seller-localidad');
+            const telEl = document.getElementById('seller-telefono');
+            const countEl = document.getElementById('seller-products-count');
+
+            if (nameEl) nameEl.textContent = sellerName || '—';
+            if (emailEl) emailEl.textContent = 'Cargando...';
+            if (locEl) locEl.textContent = 'Cargando...';
+            if (telEl) telEl.textContent = 'Cargando...';
+            if (countEl) countEl.textContent = '...';
+
+            modal.show();
+
+            if (!sellerId) return;
+
+            fetch(`/api/seller/${sellerId}/`, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.ok ? r.json() : Promise.reject(r))
+                .then(data => {
+                    if (nameEl && data.name) nameEl.textContent = data.name;
+                    if (emailEl) emailEl.textContent = data.email || '—';
+                    if (locEl) locEl.textContent = data.localidad || '—';
+                    if (telEl) telEl.textContent = data.telefono || '—';
+                    if (countEl) countEl.textContent = (data.products_count != null) ? data.products_count : 0;
+                })
+                .catch(() => {
+                    if (emailEl) emailEl.textContent = '—';
+                    if (locEl) locEl.textContent = '—';
+                    if (telEl) telEl.textContent = '—';
+                    if (countEl) countEl.textContent = '0';
+                });
+        }
+
+        // Click en el botón "Publicado por" del modal de producto
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#modal-seller-btn');
+            if (!btn) return;
+            e.stopPropagation();
+            e.preventDefault();
+            openSellerModal(btn.dataset.sellerId || '', btn.dataset.sellerName || '');
+        });
+
+        // (Opcional) Soporte también para botones de vendedor en cards, si existen
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-seller-id]');
+            if (!btn) return;
+            // Evita que una card con click abra el modal de producto
+            e.stopPropagation();
+            e.preventDefault();
+            openSellerModal(btn.getAttribute('data-seller-id') || '', btn.getAttribute('data-seller-name') || '');
+        });
+        }
+
     const modalFavoriteBtn = document.getElementById('modal-favorite-btn');
     if (modalFavoriteBtn) {
-        modalFavoriteBtn.addEventListener('click', function() {
+        modalFavoriteBtn.addEventListener('click', function () {
             const productData = JSON.parse(this.dataset.productData || '{}');
             const productId = this.dataset.productId;
-            
+
             const isFavorite = favorites.some(fav => fav.id === productId);
-            
+
             if (isFavorite) {
                 removeFromFavorites(productId);
                 this.classList.remove('active');
@@ -565,33 +721,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.classList.add('active');
                 this.querySelector('i').className = 'bi bi-star-fill';
             }
-        });
-    }
-    
-    const modalCartBtn = document.getElementById('modal-cart-btn');
-    if (modalCartBtn) {
-        modalCartBtn.addEventListener('click', function() {
-            const productData = {
-                id: document.getElementById('modal-favorite-btn').dataset.productId,
-                title: document.getElementById('modal-product-title').textContent,
-                marca: document.getElementById('modal-product-marca').textContent,
-                price: document.getElementById('modal-product-price').textContent,
-                image: document.getElementById('modal-product-image').src
-            };
-            
-            addToCartSystem(productData);
-            
-            this.innerHTML = '<i class="bi bi-check-lg"></i> <span>¡Agregado!</span>';
-            this.disabled = true;
-            
-            setTimeout(() => {
-                this.innerHTML = '<i class="bi bi-cart-plus"></i> <span>Agregar al Carrito</span>';
-                this.disabled = false;
-            }, 2000);
-            
-            showNotification(`"${productData.title}" agregado al carrito`, 'success');
-        });
-    }
+    });
+}
     
     // ==================== BÚSQUEDA Y VISTAS ====================
     
