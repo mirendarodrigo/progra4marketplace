@@ -9,9 +9,15 @@
         
         <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ query|default:'' }}">
         
+        <button type="button" id="voice-search-button" class="voice-search-btn" 
+          aria-label="Búsqueda por voz">
+          🎤
+        </button>
+
         <button id="searchbtn" type="submit" class="btn icon-btn me-2 search-btn" title="Buscar">
             <i class="bi bi-search"></i>
         </button>
+
         <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
             <i class="bi bi-list-ul"></i>
         </button>
