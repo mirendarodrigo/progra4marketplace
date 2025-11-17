@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 {% load socialaccount %}
-
-
 {% block content %}
 
 <div class="container py-5">
@@ -22,20 +20,26 @@
             <div class="col">
                 <div class="card h-100 shadow-sm border-0">
                     
-                    <div class="image-hover-container card-img-top" style="height: 200px;"
-                      data-bs-toggle="modal" 
-                      data-bs-target="#productModal{{ product.id }}">
-                      
+                    <div class="image-hover-container card-img-top carousel-card-trigger" 
+                         style="height: 200px; cursor: pointer;"
+                         data-title="{{ product.title }}"
+                         data-price="{{ product.price|floatformat:2 }}"
+                         data-brand="{{ product.marca|default:'Genérico' }}"
+                         data-description="{{ product.description }}"
+                         data-seller-id="{{ product.seller.id }}"
+                         data-seller-name="{{ product.seller.username }}">
+                       
                         {% if product.image %}
-                        <img src="{{ product.image.url }}" class="object-fit-cover w-100 h-100" alt="{{ product.title }}">
+                        <img src="{{ product.image.url }}" class="object-fit-cover w-100 h-100 product-img" alt="{{ product.title }}">
                         {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" class="object-fit-cover w-100 h-100" alt="Sin imagen">
+                        <img src="{% static 'img/placeholder.png' %}" class="object-fit-cover w-100 h-100 product-img" alt="Sin imagen">
                         {% endif %}
                         
                         <div class="image-overlay">
                           <h5 class="card-title fw-bold text-truncate mb-1">{{ product.title }}</h5>
                           <p class="fs-4 fw-bolder text-white mb-0">${{ product.price|floatformat:2 }}</p>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -148,50 +152,43 @@
 </div>
 
 
-{% for product in products %}
-<div class="modal fade" id="productModal{{ product.id }}" tabindex="-1" aria-labelledby="productModalLabel{{ product.id }}" aria-hidden="true">
+
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="productModalLabel{{ product.id }}">{{ product.title }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <div class="modal-content product-modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="productModalLabel">Detalle del Producto</h5>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-            
       <div class="modal-body">
-        <div class="row">
-
-          <div class="col-md-5">
-            {% if product.image %}
-              <img src="{{ product.image.url }}" class="img-fluid rounded-3" alt="{{ product.title }}">
-            {% else %}
-              <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded-3" alt="Sin imagen">
-            {% endif %}
+        <div> <div class="modal-image-wrapper">
+            <img id="modal-product-image" src="" class="img-fluid modal-product-img" alt="Producto">
           </div>
-                    
-          <div class="col-md-7">
-            <p class="fs-4 fw-bolder text-success">${{ product.price|floatformat:2 }}</p>
-                        
-            <p><strong>Marca:</strong> {{ product.marca }}</p>
-            <p><strong>Vendedor:</strong> {{ product.seller.username }}</p>
-            <hr>
-            <h6 class="fw-bold">Descripción</h6>
-            <p>{{ product.description|default:"Este producto no tiene una descripción detallada." }}</p>
-            <p class="text-muted"><small>Stock disponible: {{ product.stock }}</small></p>
 
-            <button class="btn btn-warning w-100 mt-3 disabled" title="Funcionalidad de compra no implementada">
-              Comprar / Contactar
-            </button>
-          </div>
-        </div>
-      </div>
+          <div class="modal-info-section">
+            <h3 id="modal-product-title"></h3>
+            <p class="text-muted mb-2"><strong>Marca:</strong> <span id="modal-product-marca"></span></p>
+            <h4 class="text-primary mb-3">$<span id="modal-product-price"></span></h4>
+            <p id="modal-product-description" class="mb-4"></p>
+
+            <div class="seller-info mb-2">
+              <button type="button" id="modal-seller-btn" class="btn btn-outline-secondary btn-sm w-100 text-start">
+                <i class="bi bi-person-circle"></i>
+                Publicado por: <span id="modal-product-seller"></span>
+              </button>
+            </div>
             
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
-{% endfor %}
+            <button type="button" class="btn btn-success w-100 mb-4" id="modal-chat-btn">
+                <i class="bi bi-whatsapp"></i> Chatear con el vendedor
+            </button>
 
-{% endblock %}
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" class="btn btn-outline-warning favorite-btn flex-grow-1" id="modal-favorite-btn">
+                <i class="bi bi-star"></i> Favoritos
+              </button>
+              <button type="button" class="btn btn-primary cart-btn flex-grow-1" id="modal-cart-btn">
+                <i class="bi bi-cart-plus"></i> Agregar al Carrito
+              </button>
+            </div>
+          </div> </div>
+      </div> </div> </div> </div> {% endblock %}
