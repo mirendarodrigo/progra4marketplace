@@ -76,10 +76,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    'market.middleware.AutoLogoutMiddleware',
 ]
 
 ROOT_URLCONF = "myclase.urls"
-
+AUTO_LOGOUT_DELAY = 300
 # --------------------------------------------------------------------
 # TEMPLATES
 # --------------------------------------------------------------------

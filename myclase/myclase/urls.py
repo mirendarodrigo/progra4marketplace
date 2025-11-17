@@ -36,6 +36,7 @@ urlpatterns = [
 
     # Perfiles
     path('perfil/', include('profiles.urls', namespace='profiles')),
+    
 ]
 
 # Archivos estáticos y media solo en desarrollo

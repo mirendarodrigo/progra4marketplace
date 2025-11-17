@@ -18,4 +18,5 @@ urlpatterns = [
 
     # API para datos del vendedor
     path("api/seller/<int:pk>/", views.seller_api, name="seller_api"),
+    path('sesion-expirada/', views.session_expired, name='session_expired'),
 ]

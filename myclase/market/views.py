@@ -15,6 +15,9 @@ from core.decorators import require_complete_profile
 from django.contrib.auth.decorators import login_required
 
 
+def session_expired(request):
+    return render(request, 'market/session_expired.html')
+
 @csrf_exempt
 def crear_preferencia(request):
     if request.method == "POST":
