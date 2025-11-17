@@ -1,16 +1,21 @@
-
-from django.contrib import admin
-from django.urls import path, include
-from .views import product_list, add_product
+from django.urls import path
 from . import views
-from django.conf.urls.static import static
-
 
 app_name = "market"
+
 urlpatterns = [
-    path("add/", add_product, name="add_product"),
-    path('productos/', views.product_list, name='product_list'),
+    # Lista de productos
+    path("productos/", views.product_list, name="product_list"),
+
+    # Alta de producto
+    path("add/", views.add_product, name="add_product"),
+
+    # Modificación de producto
+    path("<int:product_id>/modificar/", views.mod_product, name="mod_product"),
+
+    # Búsqueda externa / scraper
     path("search/", views.search_products, name="search_products"),
-    path('<int:product_id>/modificar/', views.mod_product, name='mod_product'),
+
+    # API para datos del vendedor
     path("api/seller/<int:pk>/", views.seller_api, name="seller_api"),
 ]

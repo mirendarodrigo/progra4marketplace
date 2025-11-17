@@ -10,9 +10,9 @@ import mercadopago
 import json
 from django.db.models import Q
 from profiles.models import Profile
-from django.contrib.auth import get_user_model   
-
-
+from django.contrib.auth import get_user_model
+from core.decorators import require_complete_profile
+from django.contrib.auth.decorators import login_required
 
 
 @csrf_exempt
@@ -21,7 +21,7 @@ def crear_preferencia(request):
         try:
             body = json.loads(request.body)
             print("Body recibido:", body)  # 🔹 log para ver qué llega
-            
+
             sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
             preference_data = {
@@ -29,7 +29,7 @@ def crear_preferencia(request):
                 "back_urls": {
                     # Usa URLs de prueba que Mercado Pago acepte.
                     # El dominio debe ser público, no localhost.
-                    "success": "https://www.google.com/success", 
+                    "success": "https://www.google.com/success",
                     "failure": "https://www.google.com/failure",
                     "pending": "https://www.google.com/pending"
                 },
@@ -75,7 +75,7 @@ def product_list(request):
         'price_desc': '-price',
         'alpha': 'title',
     }
-    
+
     # 4. Obtener el campo de ordenamiento
     order_field = sort_options.get(sort_by, '-created_at')
 
@@ -90,36 +90,44 @@ def product_list(request):
     })
 
 
+@login_required
+@require_complete_profile
 def add_product(request):
-    # Si viene un código por GET, lo tomamos
+    print("➡️ ENTRÓ a add_product, method:", request.method)
     barcode = request.GET.get("barcode", "")
 
     if request.method == "POST":
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)  # <-- asegurate de incluir FILES si subís imagen
         if form.is_valid():
             product = form.save(commit=False)
             product.seller = request.user
-
-            # Si el campo barcode viene vacío en el form pero había uno en la URL, lo usamos
             if not product.barcode and barcode:
                 product.barcode = barcode
-
             product.save()
+            print("✅ Producto creado:", product.id)
             return redirect("market:product_list")
+        else:
+            print("❌ Form inválido:", form.errors)
     else:
-        # Precargamos el código en el formulario si vino por GET
         form = ProductForm(initial={"barcode": barcode})
 
     return render(request, "market/add_product.html", {"form": form})
 
 
+@login_required
+@require_complete_profile
 def mod_product(request, product_id):
+    print("➡️ ENTRÓ a mod_product:", product_id)
     product = get_object_or_404(Product, pk=product_id)
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
+            print("✅ Producto modificado:", product.id)
             return redirect('market:product_list')
+        else:
+            print("❌ Form inválido:", form.errors)
     else:
         form = ProductForm(instance=product)
     return render(request, 'market/mod_product.html', {'form': form})
@@ -159,6 +167,7 @@ def search_products(request):
     ]
     return JsonResponse(data, safe=False)
 
+
 def seller_api(request, pk):
     """
     Retorna JSON con datos del vendedor y su perfil:
@@ -170,7 +179,7 @@ def seller_api(request, pk):
     # Obtener Profile si existe
     profile = Profile.objects.filter(user_id=pk).first()
 
-    # Contar publicaciones (si tu Product tiene 'active', filtramos; si no, cuenta todo)
+    # Contar publicaciones
     qs = Product.objects.filter(seller_id=pk)
     if hasattr(Product, "active"):
         qs = qs.filter(active=True)
