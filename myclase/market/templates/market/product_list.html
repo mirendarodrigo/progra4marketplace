@@ -2,53 +2,72 @@
 {% load static %}
 
 {% block content %}
-<h2 class="products-page-title mb-4">Productos</h2>
+<div class="container py-5"> <h2 class="products-page-title mb-4 fw-bold text-center">Productos</h2>
 
-<div class="d-flex justify-content-center align-items-center mb-4 search-container">
-  <form method="get" action="{% url 'market:product_list' %}"
-    class="d-flex align-items-center w-100 products-search-form">
-    <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2"
-      value="{{ request.GET.q }}">
-    <button id="searchbtn" type="button" class="btn icon-btn me-2 search-btn" title="Buscar">
-      <i class="bi bi-search"></i>
-    </button>
-    <button type="button" class="btn icon-btn me-2 filter-btn" title="Filtrar / Ordenar">
-      <i class="bi bi-funnel"></i>
-    </button>
-    <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
-      <i class="bi bi-list-ul"></i>
-    </button>
-  </form>
+  <div class="d-flex justify-content-center align-items-center mb-4 search-container">
+    <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form">
+        
+        <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ query|default:'' }}">
+        
+        <button id="searchbtn" type="submit" class="btn icon-btn me-2 search-btn" title="Buscar">
+            <i class="bi bi-search"></i>
+        </button>
+        <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
+            <i class="bi bi-list-ul"></i>
+        </button>
+        <select name="sort" class="form-select me-2" onchange="this.form.submit()" style="width: auto;">
+            <option value="recent" {% if current_sort == 'recent' %}selected{% endif %}>Más recientes</option>
+            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Más antiguos</option>
+            <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+            <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+            <option value="alpha" {% if current_sort == 'alpha' %}selected{% endif %}>Orden Alfabético (A-Z)</option>
+        </select>
+    </form>
 </div>
 
-<div class="row products-container grid-view">
-  {% for p in products %}
-  <!-- añadimos data-seller-id y data-seller-name en la CARD -->
-  <div class="col-md-4 mb-4 product-item">
-    <div class="card product-card" data-seller-id="{{ p.seller.id }}"
-      data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
-      <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.title }}">
-      <div class="card-body">
-        <h5 class="card-title product-title">{{ p.title }}</h5>
-        <p class="card-text product-brand">Marca: {{ p.marca }}</p>
-        <p class="product-price">${{ p.price }}</p>
-        <p class="card-text product-description">{{ p.description }}</p>
+  <div class="row products-container grid-view">
+    {% for p in products %}
+    
+    <div class="col-md-4 mb-4 product-item">
+      <div class="card h-100 shadow-sm product-card" 
+           style="cursor: pointer;"
+           data-seller-id="{{ p.seller.id }}"
+           data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
+        
+        {% if p.image %}
+        <img src="{{ p.image.url }}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="{{ p.title }}">
+        {% else %}
+        <img src="{% static 'img/placeholder.png' %}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="Sin imagen">
+        {% endif %}
+        
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title product-title fw-bold text-truncate">{{ p.title }}</h5>
+          <p class="card-text product-brand text-muted small mb-2">Marca: {{ p.marca|default:"Genérica" }}</p>
+          <h4 class="product-price text-primary fw-bold mb-3">${{ p.price|floatformat:2 }}</h4>
+          
+          <p class="d-none product-description">{{ p.description }}</p>
 
-        <!-- este texto queda para la card (lo usa tu JS actual para el modal de producto si querés) -->
-        <small class="product-seller">
-          <button type="button" class="btn btn-outline-warning btn-sm mt-2" data-seller-id="{{ p.seller.id }}"
-            data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
-            <i class="bi bi-person-circle"></i>
-            {{ p.seller.get_full_name|default:p.seller.username }}
-          </button>
-        </small>
+          <div class="mt-auto">
+             <small class="product-seller d-block">
+                <button  class="btn btn-outline-secondary btn-sm w-50 text-start" 
+                        data-seller-id="{{ p.seller.id }}"
+                        data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
+                  <i class="bi bi-person-circle me-1"></i>
+                  {{ p.seller.get_full_name|default:p.seller.username }}
+                </button>
+             </small>
+          </div>
+        </div>
       </div>
     </div>
+    {% empty %}
+      <div class="col-12 text-center py-5">
+        <p class="fs-4 text-muted">No se encontraron productos.</p>
+      </div>
+    {% endfor %}
   </div>
-  {% endfor %}
 </div>
 
-<!-- Modal de Detalle del Producto -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content product-modal-content">
@@ -58,36 +77,31 @@
       </div>
       <div class="modal-body">
         <div>
-          <div class="modal-image-wrapper">
-            <img id="modal-product-image" src="" class="img-fluid modal-product-img" alt="Producto">
+          <div class="modal-image-wrapper mb-3">
+            <img id="modal-product-image" src="" class="img-fluid modal-product-img rounded" style="max-height: 400px; width: 100%; object-fit: contain;" alt="Producto">
           </div>
 
           <div class="modal-info-section">
-            <h3 id="modal-product-title"></h3>
+            <h3 id="modal-product-title" class="fw-bold"></h3>
             <p class="text-muted mb-2"><strong>Marca:</strong> <span id="modal-product-marca"></span></p>
-            <h4 class="text-primary mb-3">$<span id="modal-product-price"></span></h4>
-            <p id="modal-product-description" class="mb-4"></p>
+            <h4 class="text-primary mb-3 fw-bold">$<span id="modal-product-price"></span></h4>
+            <p id="modal-product-description" class="mb-4 text-break"></p>
 
-            <!-- 🔹 ahora es un BOTÓN que abre el modal de vendedor -->
-            <div class="seller-info mb-4">
-              <button type="button" id="modal-seller-btn" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-person-circle"></i>
-                Publicado por: <span id="modal-product-seller"></span>
+            <div class="seller-info mb-3">
+              <button type="button" id="modal-seller-btn" class="btn btn-light border w-100 text-start">
+                <i class="bi bi-person-circle me-2"></i>
+                Publicado por: <span id="modal-product-seller" class="fw-semibold"></span>
               </button>
             </div>
 
-            <div class="d-flex gap-2 mt-3">
-              <button type="button" class="btn btn-outline-warning favorite-btn" id="modal-favorite-btn">
+            
+
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-warning favorite-btn flex-grow-1" id="modal-favorite-btn">
                 <i class="bi bi-star"></i> Favoritos
               </button>
-              <button type="button" class="btn btn-primary cart-btn" id="modal-cart-btn">
-                <i class="bi bi-cart-plus"></i> Agregar al Carrito
-              </button>
-
-              <!-- NUEVO: Botón de chat -->
-              <button type="button" class="btn btn-outline-primary" id="modal-chat-btn" data-seller-id=""
-                data-product-id="" data-product-title="" data-product-price="" data-product-brand="">
-                <i class="bi bi-chat-dots"></i> Chatear con el vendedor
+              <button type="button" class="btn btn-primary cart-btn flex-grow-1" id="modal-cart-btn">
+                <i class="bi bi-cart-plus me-2"></i> Agregar al Carrito
               </button>
             </div>
           </div>
@@ -97,20 +111,54 @@
   </div>
 </div>
 
-<!-- 🔹 Modal de Vendedor -->
 <div class="modal fade" id="sellerModal" tabindex="-1" aria-labelledby="sellerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content" style="border-radius: 16px; background: #fff4b8;">
-      <div class="modal-header">
-        <h5 class="modal-title" id="sellerModalLabel">Información del Vendedor</h5>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow" style="border-radius: 16px; border: none;">
+      <div class="modal-header bg-light" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
+        <h5 class="modal-title fw-bold" id="sellerModalLabel">Perfil del Vendedor</h5>
         <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body">
-        <p><strong>Nombre:</strong> <span id="seller-name">—</span></p>
-        <p><strong>Correo:</strong> <span id="seller-email">—</span></p>
-        <p><strong>Localidad:</strong> <span id="seller-localidad">—</span></p>
-        <p><strong>Teléfono:</strong> <span id="seller-telefono">—</span></p>
-        <p><strong>Publicaciones activas:</strong> <span id="seller-products-count">0</span></p>
+      <div class="modal-body p-4">
+        <div class="text-center mb-4">
+            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 24px;">
+                <i class="bi bi-person"></i>
+            </div>
+            <h4 class="mt-2 mb-0" id="seller-name">—</h4>
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-center border-bottom pb-2">
+                <i class="bi bi-envelope fs-4 text-muted me-3"></i>
+                <div>
+                    <small class="text-muted d-block">Correo</small>
+                    <span id="seller-email" class="fw-medium">—</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center border-bottom pb-2">
+                <i class="bi bi-geo-alt fs-4 text-muted me-3"></i>
+                <div>
+                    <small class="text-muted d-block">Localidad</small>
+                    <span id="seller-localidad" class="fw-medium">—</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center border-bottom pb-2">
+                <i class="bi bi-telephone fs-4 text-muted me-3"></i>
+                <div>
+                    <small class="text-muted d-block">Teléfono</small>
+                    <span id="seller-telefono" class="fw-medium">—</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-shop fs-4 text-muted me-3"></i>
+                <div>
+                    <small class="text-muted d-block">Publicaciones activas</small>
+                    <span id="seller-products-count" class="badge bg-secondary">0</span>
+                </div>
+                <button type="button" class="btn btn-success w-50 mb-3" id="modal-chat-btn">
+                <i class="bi bi-chat me-2"></i> Chatear con el vendedor
+            </button>
+            </div>
+        </div>
       </div>
     </div>
   </div>

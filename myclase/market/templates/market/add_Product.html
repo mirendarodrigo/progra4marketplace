@@ -1,114 +1,84 @@
-{% extends "base.html" %}
-{% load static %}
+  {% extends "base.html" %}
 
 {% block content %}
-<h2 class="products-page-title mb-4">Productos</h2>
+<div class="add-product-container">
+  <h2 class="title">Agregar Producto</h2>
 
-<div class="d-flex justify-content-center align-items-center mb-4 search-container">
-  <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form">
-    <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ request.GET.q }}">
-    <button id="searchbtn" type="button" class="btn icon-btn me-2 search-btn" title="Buscar">
-      <i class="bi bi-search"></i>
-    </button>
-    <button type="button" class="btn icon-btn me-2 filter-btn" title="Filtrar / Ordenar">
-      <i class="bi bi-funnel"></i>
-    </button>
-    <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
-      <i class="bi bi-list-ul"></i>
-    </button>
+  <form method="post" enctype="multipart/form-data" class="add-product-form">
+    {% csrf_token %}
+
+    <!-- Imagen arriba con botón -->
+    <div class="image-upload-group">
+      <div class="image-preview-wrapper">
+        <img id="imagePreview"
+             src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}{{ MEDIA_URL }}products/placeholder.png{% endif %}"
+             data-placeholder="{{ MEDIA_URL }}products/placeholder.png"
+             alt="Preview imagen"
+             class="image-preview">
+      </div>
+
+      <!-- Botón estilizado -->
+      <button type="button" id="selectImageBtn" class="btn select-image-btn">
+        Seleccionar Imagen
+      </button>
+
+      <!-- Input oculto -->
+      {{ form.image }}
+    </div>
+
+    <!-- Inputs debajo -->
+    <div class="form-inputs">
+      <div class="form-group">
+        <label for="id_title">Título</label>
+        {{ form.title }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_description">Descripción</label>
+        {{ form.description }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_marca">Marca</label>
+        {{ form.marca }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_price">Precio</label>
+        {{ form.price }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_barcode">Código de Barras</label>
+        <div class="barcode-group">
+          {{ form.barcode }}
+          <button type="button" class="barcode-scan-btn" onclick="window.location.href='{% url 'scanner:scan' %}'">
+            📷 Escaner
+          </button> 
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_stock">Stock</label>
+        <div class="stock-group">
+          <button type="button" class="stock-btn" onclick="decrementStock()">−</button>
+          {{ form.stock }}
+          <button type="button" class="stock-btn" onclick="incrementStock()">+</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_active">Activo</label>
+        {{ form.active }}
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="submit" class="btn save-btn">Agregar</button>
+      <a href="{% url 'scanner:scan' %}" class="btn scanner-btn">🔍 Ir al Scanner</a>
+      <a href="{% url 'market:product_list' %}" class="btn cancel-btn">Volver a la lista</a>
+    </div>
   </form>
 </div>
-
-<div class="row products-container grid-view">
-  {% for p in products %}
-    <div class="col-md-4 mb-4 product-item">
-      <div class="card product-card">
-        <img src="{{ p.image.url }}" class="card-img-top product-img" alt="{{ p.title }}">
-        <div class="card-body">
-          <h5 class="card-title product-title">{{ p.title }}</h5>
-          <p class="card-text product-brand">Marca: {{ p.marca }}</p>
-          <p class="product-price">${{ p.price }}</p>
-          <p class="card-text product-description">{{ p.description }}</p>
-
-          <!-- Botón de vendedor -> abre modal con info -->
-          <div class="seller-info mt-2">
-            <button type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    data-seller-id="{{ p.seller.id }}"
-                    data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
-              <i class="bi bi-person-circle"></i>
-              {{ p.seller.get_full_name|default:p.seller.username }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  {% endfor %}
-</div>
-
-<!-- Modal de Detalle del Producto -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content product-modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="productModalLabel">Detalle del Producto</h5>
-        <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div>
-          <div class="modal-image-wrapper">
-            <img id="modal-product-image" src="" class="img-fluid modal-product-img" alt="Producto">
-          </div>
-
-          <div class="modal-info-section">
-            <h3 id="modal-product-title"></h3>
-            <p class="text-muted mb-2">
-              <strong>Marca:</strong> <span id="modal-product-marca"></span>
-            </p>
-            <h4 class="text-primary mb-3">
-              $<span id="modal-product-price"></span>
-            </h4>
-            <p id="modal-product-description" class="mb-4"></p>
-
-            <div class="seller-info mb-4">
-              <small class="text-secondary">
-                <i class="bi bi-person-circle"></i>
-                Publicado por: <span id="modal-product-seller"></span>
-              </small>
-            </div>
-
-            <div class="d-flex gap-2">
-              <button type="button" class="btn btn-outline-warning favorite-btn" id="modal-favorite-btn">
-                <i class="bi bi-star"></i> Favoritos
-              </button>
-              <button type="button" class="btn btn-primary cart-btn" id="modal-cart-btn">
-                <i class="bi bi-cart-plus"></i> Agregar al Carrito
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Vendedor -->
-<div class="modal fade" id="sellerModal" tabindex="-1" aria-labelledby="sellerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="sellerModalLabel">Información del Vendedor</h5>
-        <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Nombre:</strong> <span id="seller-name"></span></p>
-        <p><strong>Correo:</strong> <span id="seller-email"></span></p>
-        <p><strong>Localidad:</strong> <span id="seller-localidad"></span></p>
-        <p><strong>Teléfono:</strong> <span id="seller-telefono"></span></p>
-        <p><strong>Publicaciones activas:</strong> <span id="seller-products-count"></span></p>
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}

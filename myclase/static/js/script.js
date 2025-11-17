@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+
     // ==================== SISTEMA DE FAVORITOS ====================
-    
+
     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     let budgetMode = false;
-    
+
     const favoritesToggle = document.getElementById('favoritesToggle');
     const favoritesDropdown = document.getElementById('favoritesDropdown');
     const favoritesBadge = document.getElementById('favoritesBadge');
@@ -12,24 +13,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const budgetActions = document.getElementById('budgetActions');
     const btnCancelBudget = document.getElementById('btnCancelBudget');
     const btnGenerateBudget = document.getElementById('btnGenerateBudget');
-    
+
     updateFavoritesBadge();
     renderFavorites();
-    
+
     if (favoritesToggle && favoritesDropdown) {
         favoritesToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             favoritesDropdown.classList.toggle('show');
-            if (cartDropdown) cartDropdown.classList.remove('show');
+            // Cierra el carrito si está abierto (verificando si existe la variable)
+            const cartDropdownEl = document.getElementById('cartDropdown');
+            if (cartDropdownEl) cartDropdownEl.classList.remove('show');
         });
-        
+
         document.addEventListener('click', (e) => {
             if (!favoritesDropdown.contains(e.target) && !favoritesToggle.contains(e.target)) {
                 favoritesDropdown.classList.remove('show');
             }
         });
     }
-    
+
     function updateFavoritesBadge() {
         if (favoritesBadge) {
             const count = favorites.length;
@@ -41,10 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-    
+
     function renderFavorites() {
         if (!favoritesList) return;
-        
+
         if (favorites.length === 0) {
             favoritesList.innerHTML = `
                 <div class="empty-favorites">
@@ -54,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             return;
         }
-        
+
         favoritesList.innerHTML = favorites.map(fav => `
             <div class="favorite-item ${budgetMode ? 'budget-mode' : ''}" data-id="${fav.id}">
                 ${budgetMode ? `<input type="checkbox" class="budget-checkbox" data-id="${fav.id}">` : ''}
@@ -73,10 +76,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         `).join('');
-        
+
         attachFavoriteItemListeners();
     }
-    
+
     function attachFavoriteItemListeners() {
         document.querySelectorAll('.btn-add-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -88,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         });
-        
+
         document.querySelectorAll('.btn-remove-fav').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.dataset.id;
@@ -96,38 +99,60 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-    
+
     function addToFavorites(product) {
         if (favorites.some(fav => fav.id === product.id)) {
             showNotification('El producto ya está en favoritos', 'info');
             return false;
         }
-        
+
         favorites.push(product);
         localStorage.setItem('favorites', JSON.stringify(favorites));
         updateFavoritesBadge();
         renderFavorites();
-        
+
         showNotification('Producto agregado a favoritos', 'success');
         return true;
     }
-    
+
     function removeFromFavorites(id) {
         favorites = favorites.filter(fav => fav.id !== id);
         localStorage.setItem('favorites', JSON.stringify(favorites));
         updateFavoritesBadge();
         renderFavorites();
-        
+
+        // Actualizar botón del modal si está abierto
         const modalFavBtn = document.getElementById('modal-favorite-btn');
         if (modalFavBtn && modalFavBtn.dataset.productId === id) {
-            modalFavBtn.classList.remove('active');
-            const icon = modalFavBtn.querySelector('i');
-            if (icon) icon.className = 'bi bi-star';
+            // Si usamos la función auxiliar de UI:
+            if (typeof updateFavBtnUI === 'function') {
+                updateFavBtnUI(modalFavBtn, false);
+            } else {
+                modalFavBtn.classList.remove('active');
+                const icon = modalFavBtn.querySelector('i');
+                if (icon) icon.className = 'bi bi-star';
+            }
         }
-        
+
         showNotification('Producto eliminado de favoritos', 'info');
     }
-    
+
+    // Helper para UI del botón favoritos
+    function updateFavBtnUI(btn, isActive) {
+        const icon = btn.querySelector('i');
+        if (isActive) {
+            btn.classList.add('active', 'btn-warning');
+            btn.classList.remove('btn-outline-warning');
+            if (icon) icon.className = 'bi bi-star-fill';
+            btn.innerHTML = '<i class="bi bi-star-fill"></i> Quitar de Favoritos';
+        } else {
+            btn.classList.remove('active', 'btn-warning');
+            btn.classList.add('btn-outline-warning');
+            if (icon) icon.className = 'bi bi-star';
+            btn.innerHTML = '<i class="bi bi-star"></i> Favoritos';
+        }
+    }
+
     if (btnBudget) {
         btnBudget.addEventListener('click', () => {
             budgetMode = !budgetMode;
@@ -136,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderFavorites();
         });
     }
-    
+
     if (btnCancelBudget) {
         btnCancelBudget.addEventListener('click', () => {
             budgetMode = false;
@@ -145,25 +170,25 @@ document.addEventListener("DOMContentLoaded", () => {
             renderFavorites();
         });
     }
-    
+
     if (btnGenerateBudget) {
         btnGenerateBudget.addEventListener('click', () => {
             const selectedCheckboxes = document.querySelectorAll('.budget-checkbox:checked');
             const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
-            
+
             if (selectedIds.length === 0) {
                 showNotification('Selecciona al menos un producto', 'warning');
                 return;
             }
-            
+
             const selectedProducts = favorites.filter(fav => selectedIds.includes(fav.id));
             generateBudget(selectedProducts);
         });
     }
-    
+
     function generateBudget(products) {
         const total = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
-        
+
         let budgetHTML = `
             <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; border: 3px solid #ffd97d; border-radius: 15px; background: white;">
                 <div style="background: linear-gradient(135deg, #f56416 0%, #772014 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
@@ -202,10 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         `;
-        
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
-            
             <!DOCTYPE html>
             <html>
             <head>
@@ -224,14 +248,13 @@ document.addEventListener("DOMContentLoaded", () => {
             </html>
         `);
         printWindow.document.close();
-        
         showNotification('Presupuesto generado', 'success');
     }
-    
+
     // ==================== SISTEMA DE CARRITO ====================
-    
+
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
+
     const cartToggle = document.getElementById('cartToggle');
     const cartDropdown = document.getElementById('cartDropdown');
     const cartBadge = document.getElementById('cartBadge');
@@ -240,24 +263,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartTotalAmount = document.getElementById('cartTotalAmount');
     const btnClearCart = document.getElementById('btnClearCart');
     const btnCheckout = document.getElementById('btnCheckout');
-    
+
     updateCartBadge();
     renderCart();
-    
+
     if (cartToggle && cartDropdown) {
         cartToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             cartDropdown.classList.toggle('show');
             if (favoritesDropdown) favoritesDropdown.classList.remove('show');
         });
-        
+
         document.addEventListener('click', (e) => {
             if (!cartDropdown.contains(e.target) && !cartToggle.contains(e.target)) {
                 cartDropdown.classList.remove('show');
             }
         });
     }
-    
+
     function updateCartBadge() {
         if (cartBadge) {
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -269,14 +292,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-    
+
     function calculateCartTotal() {
         return cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
     }
-    
+
     function renderCart() {
         if (!cartList) return;
-        
+
         if (cart.length === 0) {
             cartList.innerHTML = `
                 <div class="empty-cart">
@@ -287,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (cartFooter) cartFooter.classList.add('d-none');
             return;
         }
-        
+
         cartList.innerHTML = cart.map(item => `
             <div class="cart-item" data-id="${item.id}">
                 <img src="${item.image}" alt="${item.title}" class="cart-item-img">
@@ -311,17 +334,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             </div>
         `).join('');
-        
+
         if (cartFooter) {
             cartFooter.classList.remove('d-none');
             if (cartTotalAmount) {
                 cartTotalAmount.textContent = `$${calculateCartTotal().toFixed(2)}`;
             }
         }
-        
+
         attachCartItemListeners();
     }
-    
+
     function attachCartItemListeners() {
         document.querySelectorAll('.btn-increase').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -329,14 +352,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 updateCartItemQuantity(id, 1);
             });
         });
-        
+
         document.querySelectorAll('.btn-decrease').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.dataset.id;
                 updateCartItemQuantity(id, -1);
             });
         });
-        
+
         document.querySelectorAll('.btn-remove-cart').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = e.currentTarget.dataset.id;
@@ -344,39 +367,39 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     }
-    
+
     function addToCartSystem(product) {
         const existingItem = cart.find(item => item.id === product.id);
-        
+
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
             cart.push({ ...product, quantity: 1 });
         }
-        
+
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartBadge();
         renderCart();
         return true;
     }
-    
+
     function updateCartItemQuantity(id, change) {
         const item = cart.find(item => item.id === id);
-        
+
         if (item) {
             item.quantity += change;
-            
+
             if (item.quantity <= 0) {
                 removeFromCart(id);
                 return;
             }
-            
+
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartBadge();
             renderCart();
         }
     }
-    
+
     function removeFromCart(id) {
         cart = cart.filter(item => item.id !== id);
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -384,11 +407,11 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCart();
         showNotification('Producto eliminado del carrito', 'info');
     }
-    
+
     if (btnClearCart) {
         btnClearCart.addEventListener('click', () => {
             if (cart.length === 0) return;
-            
+
             if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
                 cart = [];
                 localStorage.setItem('cart', JSON.stringify(cart));
@@ -398,17 +421,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
+
     if (btnCheckout) {
         btnCheckout.addEventListener('click', async () => {
             if (cart.length === 0) {
                 showNotification('Tu carrito está vacío', 'warning');
                 return;
             }
-            
+
             btnCheckout.disabled = true;
             btnCheckout.classList.add('loading');
-            
+
             try {
                 const items = cart.map(item => ({
                     title: item.title,
@@ -416,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     unit_price: parseFloat(item.price),
                     currency_id: "ARS"
                 }));
-                
+
                 const response = await fetch('/crear-preferencia/', {
                     method: 'POST',
                     headers: {
@@ -425,14 +448,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({ items })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Error al crear la preferencia de pago');
                 }
-                
+
                 const data = await response.json();
                 window.location.href = data.init_point;
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('Error al procesar la compra. Intenta nuevamente.', 'warning');
@@ -441,9 +464,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
+
     // ==================== SISTEMA DE NOTIFICACIONES ====================
-    
+
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
@@ -451,14 +474,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i>
             <span>${message}</span>
         `;
-        
+
         Object.assign(notification.style, {
             position: 'fixed',
             top: '100px',
             right: '20px',
-            background: type === 'success' ? 'linear-gradient(135deg, #ffd97d 0%, #fff689 100%)' : 
-                       type === 'warning' ? 'linear-gradient(135deg, #f56416 0%, #772014 100%)' :
-                       'linear-gradient(135deg, #7c7c7c 0%, #5a5a5a 100%)',
+            background: type === 'success' ? 'linear-gradient(135deg, #ffd97d 0%, #fff689 100%)' :
+                type === 'warning' ? 'linear-gradient(135deg, #f56416 0%, #772014 100%)' :
+                    'linear-gradient(135deg, #7c7c7c 0%, #5a5a5a 100%)',
             color: type === 'warning' ? 'white' : '#772014',
             padding: '15px 20px',
             borderRadius: '10px',
@@ -470,15 +493,15 @@ document.addEventListener("DOMContentLoaded", () => {
             fontWeight: '600',
             animation: 'slideIn 0.3s ease'
         });
-        
+
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
-    
+
     if (!document.getElementById('notification-styles')) {
         const style = document.createElement('style');
         style.id = 'notification-styles';
@@ -494,179 +517,64 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         document.head.appendChild(style);
     }
-    
-     // ==================== MODAL DE PRODUCTO ====================
 
-    const productModal = document.getElementById('productModal');
-    const productCards = document.querySelectorAll('.product-card');
+    // ==================== MODAL DE PRODUCTO (Lógica Unificada) ====================
 
-    if (productModal && productCards.length > 0) {
-        const modalInstance = new bootstrap.Modal(productModal);
+    const productModalElement = document.getElementById('productModal');
 
-        // Helper para abrir el modal de Vendedor (si querés usarlo desde el botón del modal)
-        function openSellerModalById(sellerId, sellerName) {
+    if (productModalElement) {
+        const modalInstance = new bootstrap.Modal(productModalElement);
+
+        // ---------------------------------------------------------
+        // HELPER: Función para abrir el modal de vendedor
+        // AHORA ACEPTA "productContext" PARA CONFIGURAR EL CHAT
+        // ---------------------------------------------------------
+        window.openSellerModalById = function (sellerId, sellerName, productContext = null) {
             const modalEl = document.getElementById('sellerModal');
             if (!modalEl || !sellerId) return;
 
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            const modalSeller = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            // Elementos de info del vendedor
             const nameEl = document.getElementById('seller-name');
             const emailEl = document.getElementById('seller-email');
             const locEl = document.getElementById('seller-localidad');
             const telEl = document.getElementById('seller-telefono');
             const countEl = document.getElementById('seller-products-count');
 
+            // Elemento botón de chat (AHORA VIVE AQUÍ)
+            const chatBtn = document.getElementById('modal-chat-btn');
+
+            // 1. Resetear UI
             if (nameEl) nameEl.textContent = sellerName || '—';
             if (emailEl) emailEl.textContent = 'Cargando...';
             if (locEl) locEl.textContent = 'Cargando...';
             if (telEl) telEl.textContent = 'Cargando...';
             if (countEl) countEl.textContent = '...';
 
-            modal.show();
-
-            // Ajustá el prefijo si tu ruta está namespaced (p.ej. /market/api/seller/)
-            fetch(`/api/seller/${sellerId}/`, { headers: { 'Accept': 'application/json' } })
-                .then(r => r.ok ? r.json() : Promise.reject(r))
-                .then(data => {
-                    if (emailEl) emailEl.textContent = data.email || '—';
-                    if (locEl) locEl.textContent = data.localidad || '—';
-                    if (telEl) telEl.textContent = data.telefono || '—';
-                    if (countEl) countEl.textContent = (data.products_count != null) ? data.products_count : 0;
-                    if (nameEl && data.name) nameEl.textContent = data.name;
-                })
-                .catch(() => {
-                    if (emailEl) emailEl.textContent = '—';
-                    if (locEl) locEl.textContent = '—';
-                    if (telEl) telEl.textContent = '—';
-                    if (countEl) countEl.textContent = '0';
-                });
-        }
-
-        productCards.forEach(card => {
-            card.addEventListener('click', function () {
-                const img = this.querySelector('.product-img')?.src || '';
-                const title = (this.querySelector('.product-title')?.textContent || '').trim();
-                const marca = (this.querySelector('.product-brand')?.textContent || '')
-                    .replace('Marca:', '').trim();
-                const price = (this.querySelector('.product-price')?.textContent || '')
-                    .trim().replace('$', '');
-                const description = (this.querySelector('.product-description')?.textContent || '').trim();
-
-                // Obtener seller desde un botón dentro de la card (recomendado)
-                const cardSellerBtn = this.querySelector('button[data-seller-id]');
-                const sellerId = cardSellerBtn?.dataset.sellerId || '';
-                const sellerName = cardSellerBtn?.dataset.sellerName
-                    || (this.querySelector('.product-seller')?.textContent.trim() || '');
-
-                // ID "slug" del producto (para favoritos / chat)
-                const productId = title.toLowerCase().replace(/\s+/g, '-');
-
-                // Rellenar modal de producto
-                const elImg = document.getElementById('modal-product-image');
-                const elTitle = document.getElementById('modal-product-title');
-                const elMarca = document.getElementById('modal-product-marca');
-                const elPrice = document.getElementById('modal-product-price');
-                const elDesc = document.getElementById('modal-product-description');
-                const elSell = document.getElementById('modal-product-seller');
-
-                if (elImg) elImg.src = img;
-                if (elTitle) elTitle.textContent = title;
-                if (elMarca) elMarca.textContent = marca;
-                if (elPrice) elPrice.textContent = price;
-                if (elDesc) elDesc.textContent = description;
-                if (elSell) elSell.textContent = sellerName;
-
-                // Botón "Publicado por" dentro del modal (si lo tenés en el HTML con id="modal-seller-btn")
-                const sellerBtn = document.getElementById('modal-seller-btn');
-                if (sellerBtn) {
-                    sellerBtn.dataset.sellerId = sellerId;
-                    sellerBtn.dataset.sellerName = sellerName;
-                    sellerBtn.disabled = !sellerId;
-                    sellerBtn.onclick = () => openSellerModalById(sellerId, sellerName);
-                }
-
-                // Botón "Favoritos"
-                const modalFavBtn = document.getElementById('modal-favorite-btn');
-                if (modalFavBtn) {
-                    modalFavBtn.dataset.productId = productId;
-                    modalFavBtn.dataset.productData = JSON.stringify({
-                        id: productId,
-                        title: title,
-                        marca: marca,
-                        price: price,
-                        image: img,
-                        seller: sellerName
-                    });
-
-                    const isFavorite = (typeof favorites !== 'undefined')
-                        ? favorites.some(fav => fav.id === productId)
-                        : false;
-
-                    if (isFavorite) {
-                        modalFavBtn.classList.add('active');
-                        modalFavBtn.querySelector('i').className = 'bi bi-star-fill';
-                    } else {
-                        modalFavBtn.classList.remove('active');
-                        modalFavBtn.querySelector('i').className = 'bi bi-star';
-                    }
-                }
-
-                // Botón "Chatear con el vendedor" (id="modal-chat-btn" en el HTML del modal)
-                const chatBtn = document.getElementById('modal-chat-btn');
-                if (chatBtn) {
-                    chatBtn.dataset.sellerId = sellerId;
-                    chatBtn.dataset.productId = productId;
-                    chatBtn.dataset.productTitle = title;
-                    chatBtn.dataset.productPrice = price;
-                    chatBtn.dataset.productBrand = marca;
-
-                    chatBtn.disabled = !sellerId;
-                    chatBtn.onclick = () => {
-                        if (!sellerId) {
-                            if (typeof showNotification === 'function') {
-                                showNotification('No se pudo identificar al vendedor', 'warning');
-                            }
-                            return;
-                        }
+            // 2. Configurar Botón de Chat dentro de este modal
+            if (chatBtn) {
+                if (productContext) {
+                    chatBtn.classList.remove('d-none');
+                    // Limpiamos eventos anteriores clonando o reasignando
+                    chatBtn.onclick = function () {
                         const params = new URLSearchParams({
-                            product: productId || '',
-                            title: chatBtn.dataset.productTitle || '',
-                            price: chatBtn.dataset.productPrice || '',
-                            brand: chatBtn.dataset.productBrand || ''
+                            product: productContext.id || '',
+                            title: productContext.title || '',
+                            price: productContext.price || '',
+                            brand: productContext.marca || ''
                         });
-                        // Si tu app chat está namespaced bajo /chat/, esta ruta debe existir:
-                        // path('chat/start/<int:user_id>/', views.start_chat, name='start')
                         window.location.href = `/chat/start/${sellerId}/?${params.toString()}`;
                     };
+                } else {
+                    // Si abrimos el modal sin contexto de producto, ocultamos el botón
+                    chatBtn.classList.add('d-none');
                 }
+            }
 
-                modalInstance.show();
-            });
-        });
-        
+            modalSeller.show();
 
-
-        // ==================== MODAL DEL VENDEDOR (desde botón del modal) ====================
-        function openSellerModal(sellerId, sellerName) {
-            const modalEl = document.getElementById('sellerModal');
-            if (!modalEl) return;
-            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-            const nameEl = document.getElementById('seller-name');
-            const emailEl = document.getElementById('seller-email');
-            const locEl = document.getElementById('seller-localidad');
-            const telEl = document.getElementById('seller-telefono');
-            const countEl = document.getElementById('seller-products-count');
-
-            if (nameEl) nameEl.textContent = sellerName || '—';
-            if (emailEl) emailEl.textContent = 'Cargando...';
-            if (locEl) locEl.textContent = 'Cargando...';
-            if (telEl) telEl.textContent = 'Cargando...';
-            if (countEl) countEl.textContent = '...';
-
-            modal.show();
-
-            if (!sellerId) return;
-
+            // 3. Fetch de datos extra
             fetch(`/api/seller/${sellerId}/`, { headers: { 'Accept': 'application/json' } })
                 .then(r => r.ok ? r.json() : Promise.reject(r))
                 .then(data => {
@@ -676,56 +584,182 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (telEl) telEl.textContent = data.telefono || '—';
                     if (countEl) countEl.textContent = (data.products_count != null) ? data.products_count : 0;
                 })
-                .catch(() => {
-                    if (emailEl) emailEl.textContent = '—';
-                    if (locEl) locEl.textContent = '—';
-                    if (telEl) telEl.textContent = '—';
-                    if (countEl) countEl.textContent = '0';
-                });
+                .catch(err => console.error("Error cargando vendedor", err));
+        };
+
+        function openProductModal(cardElement) {
+            // 1. OBTENER DATOS 
+            const img = cardElement.querySelector('.product-img')?.src || cardElement.querySelector('img')?.src || '';
+
+            const title = cardElement.dataset.title || (cardElement.querySelector('.product-title')?.textContent || '').trim();
+
+            let rawPrice = cardElement.dataset.price || (cardElement.querySelector('.product-price')?.textContent || '');
+            const price = rawPrice.replace('$', '').replace(',', '.').trim();
+
+            const description = cardElement.dataset.description || (cardElement.querySelector('.product-description')?.textContent || '').trim();
+            const brand = cardElement.dataset.brand || (cardElement.querySelector('.product-brand')?.textContent || '').replace('Marca:', '').trim();
+
+            let sellerId = cardElement.dataset.sellerId;
+            let sellerName = cardElement.dataset.sellerName;
+
+            if (!sellerId) {
+                const cardSellerBtn = cardElement.querySelector('button[data-seller-id]');
+                sellerId = cardSellerBtn?.dataset.sellerId || '';
+                sellerName = cardSellerBtn?.dataset.sellerName ||
+                    (cardElement.querySelector('.product-seller')?.textContent.trim() || 'Vendedor');
+            }
+
+            const productId = title.toLowerCase().replace(/\s+/g, '-');
+
+            // Objeto producto
+            const productObj = {
+                id: productId,
+                title: title,
+                price: price,
+                image: img,
+                marca: brand,
+                seller: sellerName
+            };
+
+            // 2. RELLENAR LA UI DEL MODAL
+            const elImg = document.getElementById('modal-product-image');
+            if (elImg) elImg.src = img;
+
+            const elTitle = document.getElementById('modal-product-title');
+            if (elTitle) elTitle.textContent = title;
+
+            const elMarca = document.getElementById('modal-product-marca');
+            if (elMarca) elMarca.textContent = brand;
+
+            const elPrice = document.getElementById('modal-product-price');
+            if (elPrice) elPrice.textContent = price;
+
+            const elDesc = document.getElementById('modal-product-description');
+            if (elDesc) elDesc.textContent = description;
+
+            const elSell = document.getElementById('modal-product-seller');
+            if (elSell) elSell.textContent = sellerName;
+
+            // 3. CONFIGURAR BOTÓN "AGREGAR AL CARRITO"
+            const addToCartBtn = document.getElementById('modal-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.onclick = function () {
+                    addToCartSystem(productObj);
+                    showNotification(`"${title}" agregado al carrito`, 'success');
+                    modalInstance.hide();
+                };
+            }
+
+            // 4. CONFIGURAR BOTÓN "FAVORITOS"
+            const modalFavBtn = document.getElementById('modal-favorite-btn');
+            if (modalFavBtn) {
+                const isFav = favorites.some(f => f.id === productId);
+                updateFavBtnUI(modalFavBtn, isFav);
+
+                modalFavBtn.onclick = function () {
+                    const currentFavState = favorites.some(f => f.id === productId);
+                    if (currentFavState) {
+                        removeFromFavorites(productId);
+                        updateFavBtnUI(modalFavBtn, false);
+                    } else {
+                        addToFavorites(productObj);
+                        updateFavBtnUI(modalFavBtn, true);
+                    }
+                };
+            }
+
+            // 5. CONFIGURAR BOTÓN "PUBLICADO POR" (En el modal de producto)
+            const sellerProfileBtn = document.getElementById('modal-seller-btn');
+            if (sellerProfileBtn) {
+                sellerProfileBtn.disabled = !sellerId;
+                sellerProfileBtn.onclick = function () {
+                    // IMPORTANTE: Pasamos el productObj para que el chat funcione
+                    if (sellerId) window.openSellerModalById(sellerId, sellerName, productObj);
+                };
+            }
+
+            // 7. MOSTRAR MODAL
+            modalInstance.show();
         }
 
-        // Click en el botón "Publicado por" del modal de producto
+        // --- HELPERS PARA CREAR CONTEXTO DESDE LA TARJETA (PARA BOTÓN VENDEDOR) ---
+        function getContextFromCard(card) {
+            const title = card.dataset.title || (card.querySelector('.product-title')?.textContent || '').trim();
+            let rawPrice = card.dataset.price || (card.querySelector('.product-price')?.textContent || '');
+            const price = rawPrice.replace('$', '').replace(',', '.').trim();
+            const brand = card.dataset.brand || (card.querySelector('.product-brand')?.textContent || '').replace('Marca:', '').trim();
+            const productId = title.toLowerCase().replace(/\s+/g, '-');
+
+            return {
+                id: productId,
+                title: title,
+                price: price,
+                marca: brand
+            };
+        }
+
+        // CASO A: LISTA DE PRODUCTOS (Página Explorar)
+        const productCards = document.querySelectorAll('.product-card');
+        if (productCards.length > 0) {
+            productCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // 1. ¿El clic fue en el botón del vendedor?
+                    const sellerBtn = e.target.closest('button[data-seller-id]');
+                    if (sellerBtn) {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        const sId = sellerBtn.dataset.sellerId;
+                        const sName = sellerBtn.dataset.sellerName;
+                        const context = getContextFromCard(card); // Obtenemos datos del producto
+
+                        window.openSellerModalById(sId, sName, context);
+                        return;
+                    }
+                    // 2. Si es otro botón/enlace, ignorar
+                    if (e.target.closest('button') || e.target.closest('a')) return;
+                    
+                    // 3. Abrir modal de producto
+                    openProductModal(card);
+                });
+            });
+        }
+
+        // CASO B: CARRUSEL DEL HOME
+        const homeCards = document.querySelectorAll('.carousel-card-trigger');
+        if (homeCards.length > 0) {
+            homeCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Misma lógica para el botón vendedor si existiera en el Home (aunque ahí está oculto)
+                    const sellerBtn = e.target.closest('button[data-seller-id]');
+                    if (sellerBtn) {
+                        e.stopPropagation(); e.preventDefault();
+                        // En Home los datos están en dataset del contenedor principal (card), no botones internos
+                        // pero el helper getContextFromCard maneja dataset también.
+                        const context = getContextFromCard(card);
+                        const sId = sellerBtn.dataset.sellerId || card.dataset.sellerId;
+                        const sName = sellerBtn.dataset.sellerName || card.dataset.sellerName;
+                        window.openSellerModalById(sId, sName, context);
+                        return;
+                    }
+                    
+                    if (e.target.closest('button') || e.target.closest('a')) return;
+                    openProductModal(card);
+                });
+            });
+        }
+
+        // ==================== MODAL DEL VENDEDOR (Clicks externos) ====================
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('#modal-seller-btn');
-            if (!btn) return;
-            e.stopPropagation();
-            e.preventDefault();
-            openSellerModal(btn.dataset.sellerId || '', btn.dataset.sellerName || '');
-        });
-
-        // (Opcional) Soporte también para botones de vendedor en cards, si existen
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('button[data-seller-id]');
-            if (!btn) return;
-            // Evita que una card con click abra el modal de producto
-            e.stopPropagation();
-            e.preventDefault();
-            openSellerModal(btn.getAttribute('data-seller-id') || '', btn.getAttribute('data-seller-name') || '');
-        });
-        }
-
-    const modalFavoriteBtn = document.getElementById('modal-favorite-btn');
-    if (modalFavoriteBtn) {
-        modalFavoriteBtn.addEventListener('click', function () {
-            const productData = JSON.parse(this.dataset.productData || '{}');
-            const productId = this.dataset.productId;
-
-            const isFavorite = favorites.some(fav => fav.id === productId);
-
-            if (isFavorite) {
-                removeFromFavorites(productId);
-                this.classList.remove('active');
-                this.querySelector('i').className = 'bi bi-star';
-            } else {
-                addToFavorites(productData);
-                this.classList.add('active');
-                this.querySelector('i').className = 'bi bi-star-fill';
+            if (btn) {
+                e.stopPropagation();
             }
-    });
-}
-    
+        });
+    }
+
     // ==================== BÚSQUEDA Y VISTAS ====================
-    
+
     const toggleBtn = document.querySelector('.toggle-view-btn');
     const productsContainer = document.querySelector('.products-container');
 
@@ -735,7 +769,7 @@ document.addEventListener("DOMContentLoaded", () => {
             productsContainer.classList.toggle('grid-view', !isList);
 
             const icon = toggleBtn.querySelector('i');
-            if(icon){
+            if (icon) {
                 icon.className = isList ? 'bi bi-grid-3x3-gap' : 'bi bi-list-ul';
             }
         });
@@ -745,59 +779,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const searchBtn = document.getElementById("searchbtn");
     const searchBox = document.getElementById("searchbox");
-    const sortOptions = document.getElementById("sortOptions"); // ID del nuevo <select>
+    const sortOptions = document.getElementById("sortOptions");
 
-    // Función unificada que lee AMBOS campos y recarga la página
     function performSearchAndSort() {
-        // Salir si los elementos no están en la página
-        if (!searchBox || !sortOptions) return; 
+        if (!searchBox || !sortOptions) return;
 
         const query = searchBox.value.trim();
         const sortValue = sortOptions.value;
-        
-        // Usamos URLSearchParams para construir la URL de forma segura
         const params = new URLSearchParams();
-        
-        if (query) {
-            params.append('q', query);
-        }
-        
-        // Siempre añadimos el 'sort', incluso si es el de por defecto
+
+        if (query) params.append('q', query);
         params.append('sort', sortValue);
 
-        const queryString = params.toString();
-        
-        // Recargamos la página en la misma ruta pero con los nuevos parámetros
-        window.location.href = window.location.pathname + '?' + queryString;
+        window.location.href = window.location.pathname + '?' + params.toString();
     }
 
-    // 1. Asignamos la función al botón de búsqueda
     if (searchBtn) {
         searchBtn.addEventListener("click", performSearchAndSort);
     }
 
-    // 2. Asignamos la MISMA función a cuando el usuario cambia el orden
     if (sortOptions) {
         sortOptions.addEventListener("change", performSearchAndSort);
     }
 
 
     // ==================== ADD/MOD PRODUCT - PREVIEW DE IMAGEN ====================
-    
+
     const selectImageBtn = document.getElementById("selectImageBtn");
     const imageInput = document.getElementById("id_image");
     const imagePreview = document.getElementById("imagePreview");
 
-    if(selectImageBtn && imageInput && imagePreview){
+    if (selectImageBtn && imageInput && imagePreview) {
         selectImageBtn.addEventListener("click", () => {
             imageInput.click();
         });
 
         imageInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
-            if(file){
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = function(ev){
+                reader.onload = function (ev) {
                     imagePreview.src = ev.target.result;
                 }
                 reader.readAsDataURL(file);
@@ -808,18 +829,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==================== ADD/MOD PRODUCT - CONTROLES DE STOCK ====================
-    
+
     const stockInput = document.getElementById('id_stock');
-    
-    // Funciones globales para los botones inline en HTML
-    window.incrementStock = function() {
+
+    window.incrementStock = function () {
         if (stockInput) {
             let currentValue = parseInt(stockInput.value) || 0;
             stockInput.value = currentValue + 1;
         }
     }
 
-    window.decrementStock = function() {
+    window.decrementStock = function () {
         if (stockInput) {
             let currentValue = parseInt(stockInput.value) || 0;
             if (currentValue > 0) {
@@ -829,7 +849,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==================== ADD PRODUCT - CÓDIGO DE BARRAS DESDE URL ====================
-    
+
     const barcodeInput = document.getElementById('id_barcode');
     if (barcodeInput) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -838,9 +858,9 @@ document.addEventListener("DOMContentLoaded", () => {
             barcodeInput.value = barcodeParam;
         }
     }
-    
+
     // ==================== UTILIDADES ====================
-    
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -855,24 +875,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return cookieValue;
     }
-});
 
-// Dropdown del usuario
-document.addEventListener("DOMContentLoaded", () => {
-  const avatarBtn = document.getElementById("userAvatarBtn");
-  const userDropdown = document.getElementById("userDropdown");
+    // Dropdown del usuario
+    const avatarBtn = document.getElementById("userAvatarBtn");
+    const userDropdown = document.getElementById("userDropdown");
 
-  if (avatarBtn && userDropdown) {
-    avatarBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle("show");
-    });
+    if (avatarBtn && userDropdown) {
+        avatarBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle("show");
+        });
 
-    // Cerrar al hacer click fuera
-    document.addEventListener("click", (e) => {
-      if (!userDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
-        userDropdown.classList.remove("show");
-      }
-    });
-  }
-});
+        document.addEventListener("click", (e) => {
+            if (!userDropdown.contains(e.target) && !avatarBtn.contains(e.target)) {
+                userDropdown.classList.remove("show");
+            }
+        });
+    }
+
+}); // <-- Cierre correcto del DOMContentLoaded
