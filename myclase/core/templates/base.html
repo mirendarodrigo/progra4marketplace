@@ -29,13 +29,19 @@
 
     <!-- Searchbox (Centro) - Solo si NO estamos en la página de productos -->
     {% if not request.path == '/productos/' %}
-    <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
-      <input name="q" class="form-control navbar-search-input me-2" placeholder="Buscar productos..."
+      <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
+
+        <input name="q" class="form-control navbar-search-input me-2 search-input" placeholder="Buscar productos..."
         aria-label="Search">
-      <button id="navbar-search-btn" type="submit" class="icon-btn">
-        <i class="bi bi-search"></i>
-      </button>
-    </form>
+
+        <button type="button" id="voice-search-button" class="voice-search-btn" aria-label="Búsqueda por voz">
+          🎤
+        </button>
+
+        <button id="navbar-search-btn" type="submit" class="icon-btn">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
     {% endif %}
 
     <!-- Iconos de usuario (Derecha) -->
