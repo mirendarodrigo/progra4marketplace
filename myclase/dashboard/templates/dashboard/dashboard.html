@@ -4,78 +4,93 @@
 {% block title %}Dashboard - Mis Ventas{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8 text-gray-800">Dashboard del Vendedor</h1>
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Dashboard del Vendedor</h1>
+            <p class="dashboard-subtitle">Visualiza tu desempeño de ventas</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards Section -->
+    <div class="stats-grid">
+        <!-- Aquí irían tus cards de estadísticas si los tienes -->
+    </div>
     
-    <!-- Cards de estadísticas -->
-  
-    
-    <!-- Gráficos -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Charts Section -->
+    <div class="charts-section">
         <!-- Ventas por día (últimos 7 días) -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Ventas de los últimos 7 días</h2>
+        <div class="chart-card">
+            <div class="card-header">
+                <h2>Ventas de los últimos 7 días</h2>
+                <span class="card-icon">📈</span>
+            </div>
             <canvas id="dailySalesChart"></canvas>
         </div>
         
         <!-- Ventas por mes -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Ventas mensuales</h2>
+        <div class="chart-card">
+            <div class="card-header">
+                <h2>Ventas mensuales</h2>
+                <span class="card-icon">📊</span>
+            </div>
             <canvas id="monthlySalesChart"></canvas>
         </div>
     </div>
     
-    <!-- Top productos y transacciones recientes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Data Section -->
+    <div class="data-section">
         <!-- Top 5 productos -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 text-black-800">Productos más vendidos</h2>
-            <div class="space-y-4">
+        <div class="data-card">
+            <div class="card-header">
+                <h2>Productos más vendidos</h2>
+                <span class="card-icon">🏆</span>
+            </div>
+            <div class="products-list">
                 {% for product in top_products %}
-                <div class="datosCard flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                    <div class="flex-1">
-                        <p class="datoTitulo font-semibold text-black">{{ product.product__title }}</p>
-                        <p class="datoDetail text-sm text-black">{{ product.total_quantity }} unidades vendidas</p>
+                <div class="datos-card product-item">
+                    <div class="product-info">
+                        <p class="dato-titulo">{{ product.product__title }}</p>
+                        <p class="dato-detail">{{ product.total_quantity }} unidades vendidas</p>
                     </div>
-                    <div class="text-right">
-                        <p class="datoPrecio font-bold text-black">${{ product.total_revenue|floatformat:2 }}</p>
+                    <div class="product-price">
+                        <p class="dato-precio">${{ product.total_revenue|floatformat:2 }}</p>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-black text-center py-4">No hay ventas registradas aún</p>
+                <p class="empty-message">No hay ventas registradas aún</p>
                 {% endfor %}
             </div>
         </div>
         
         <!-- Transacciones recientes -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4 tituloDatos">Transacciones recientes</h2>
-            <div class="space-y-3">
+        <div class="data-card">
+            <div class="card-header">
+                <h2>Transacciones recientes</h2>
+                <span class="card-icon">💳</span>
+            </div>
+            <div class="transactions-list">
                 {% for sale in recent_transactions %}
-                <div class="datosCard flex items-center justify-between p-3 border-l-4 
-                    {% if sale.status == 'completed' %}border-green-500 bg-green-50
-                    {% elif sale.status == 'pending' %}border-yellow-500 bg-yellow-50
-                    {% else %}border-red-500 bg-red-50{% endif %} rounded-r-lg">
-                    <div class="flex-1">
-                        <p class="datoTitulo font-semibold text-black">{{ sale.product.title }}</p>
-                        <p class="datoDetail text-sm text-black">
-                            Cliente: {{ sale.buyer.username }} | 
+                <div class="datos-card transaction-item transaction-{{ sale.status }}">
+                    <div class="transaction-status-indicator"></div>
+                    <div class="transaction-info">
+                        <p class="dato-titulo">{{ sale.product.title }}</p>
+                        <p class="dato-detail">
+                            Cliente: <strong>{{ sale.buyer.username }}</strong> | 
                             {{ sale.quantity }} unidad{% if sale.quantity > 1 %}es{% endif %}
                         </p>
-                        <p class="datoDetailtext-xs text-black">{{ sale.created_at|date:"d/m/Y H:i" }}</p>
+                        <p class="dato-detail-time">{{ sale.created_at|date:"d/m/Y H:i" }}</p>
                     </div>
-                    <div class="text-right">
-                        <p class="datoPrecio font-bold text-black">${{ sale.total_price|floatformat:2 }}</p>
-                        <span class="text-xs px-2 py-1 rounded-full
-                            {% if sale.status == 'completed' %} completada
-                            {% elif sale.status == 'pending' %} pendiente
-                            {% else %}cancelada{% endif %}">
+                    <div class="transaction-right">
+                        <p class="dato-precio">${{ sale.total_price|floatformat:2 }}</p>
+                        <span class="status-badge status-{{ sale.status }}">
                             {{ sale.get_status_display }}
                         </span>
                     </div>
                 </div>
                 {% empty %}
-                <p class="datoDetail text-black text-center py-4">No hay transacciones recientes</p>
+                <p class="empty-message">No hay transacciones recientes</p>
                 {% endfor %}
             </div>
         </div>
@@ -98,10 +113,16 @@ new Chart(dailyCtx, {
         datasets: [{
             label: 'Ingresos ($)',
             data: dailyData,
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderColor: '#f56416ff',
+            backgroundColor: 'rgba(245, 100, 22, 0.08)',
             tension: 0.4,
-            fill: true
+            fill: true,
+            borderWidth: 3,
+            pointBackgroundColor: '#f56416ff',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
         }]
     },
     options: {
@@ -110,7 +131,11 @@ new Chart(dailyCtx, {
         plugins: {
             legend: {
                 display: true,
-                position: 'top'
+                position: 'top',
+                labels: {
+                    color: '#7c7c7c',
+                    font: { weight: 600 }
+                }
             }
         },
         scales: {
@@ -119,7 +144,19 @@ new Chart(dailyCtx, {
                 ticks: {
                     callback: function(value) {
                         return '$' + value;
-                    }
+                    },
+                    color: '#7c7c7c'
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#7c7c7c'
+                },
+                grid: {
+                    display: false
                 }
             }
         }
@@ -139,9 +176,11 @@ new Chart(monthlyCtx, {
         datasets: [{
             label: 'Ingresos ($)',
             data: monthlyData,
-            backgroundColor: 'rgba(34, 197, 94, 0.7)',
-            borderColor: 'rgb(34, 197, 94)',
-            borderWidth: 2
+            backgroundColor: 'rgba(119, 32, 20, 0.8)',
+            borderColor: '#772014ff',
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: '#f56416ff'
         }]
     },
     options: {
@@ -150,7 +189,11 @@ new Chart(monthlyCtx, {
         plugins: {
             legend: {
                 display: true,
-                position: 'top'
+                position: 'top',
+                labels: {
+                    color: '#7c7c7c',
+                    font: { weight: 600 }
+                }
             }
         },
         scales: {
@@ -159,11 +202,24 @@ new Chart(monthlyCtx, {
                 ticks: {
                     callback: function(value) {
                         return '$' + value;
-                    }
+                    },
+                    color: '#7c7c7c'
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#7c7c7c'
+                },
+                grid: {
+                    display: false
                 }
             }
         }
     }
 });
 </script>
+
 {% endblock %}

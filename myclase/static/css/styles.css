@@ -2216,7 +2216,7 @@
 
 /* Forzamos que el item ocupe todo el ancho */
 .products-container.list-view .product-item {
-  width: 100% !important;
+  width: 80% !important;
   flex: 0 0 100% !important;
   max-width: 100% !important;
 }
