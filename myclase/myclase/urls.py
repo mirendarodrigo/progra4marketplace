@@ -1,25 +1,41 @@
-
 from django.contrib import admin
 from django.urls import path, include
 from core.views import home
 from django.conf import settings
-from django.conf.urls.static import static  # 👈 asegurate de importar esto
-from market import views
-    
+from django.conf.urls.static import static
+from market import views as market_views   # 👈 renombrado por prolijidad
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
+
+    # Auth
     path('accounts/', include('allauth.urls')),
-    #path('productos/', include('market.urls')),
+
+    # --- MARKET ---
+    # Usamos UN solo include con namespace "market"
+    # Las rutas reales quedan así:
+    #   - /productos/          -> market:product_list
+    #   - /add/                -> market:add_product
+    #   - /search/             -> market:search_products
+    #   - /<id>/modificar/     -> market:mod_product
+    #   - /api/seller/<pk>/    -> market:seller_api
     path('', include(('market.urls', 'market'), namespace='market')),
-    #path("", include("market.urls")),
+
+    # Crear preferencia MP (fuera del include)
+    path("crear-preferencia/", market_views.crear_preferencia, name="crear_preferencia"),
+
+    # Chat
     path('chat/', include('chat.urls')),
+
+    # Scanner
     path('scanner/', include('scanner.urls')),
-    path("crear-preferencia/", views.crear_preferencia, name="crear_preferencia"),
+
+    # Dashboard
     path('dashboard/', include('dashboard.urls')),
-    path('perfil/', include('profiles.urls', namespace='profiles'))
-    
-    
+
+    # Perfiles
+    path('perfil/', include('profiles.urls', namespace='profiles')),
 ]
 
 # Archivos estáticos y media solo en desarrollo
