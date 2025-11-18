@@ -176,9 +176,7 @@
 }
 
 /* Product Item */
-.product-item {
-    border-left: 4px solid var(--orange-pantone);
-}
+
 
 .product-info {
     flex: 1;

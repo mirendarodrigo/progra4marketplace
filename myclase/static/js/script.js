@@ -188,178 +188,194 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function generateBudget(products) {
-        // 1. Preparación de datos básicos
-        const total = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
-        const baseUrl = window.location.origin;
-        const currentDate = new Date().toLocaleDateString();
+    // 1. Preparación de datos básicos
+    const total = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
+    const baseUrl = window.location.origin;
+    const currentDate = new Date().toLocaleDateString();
+    
+    // 2. OBTENER EL TOKEN CSRF DE LA VENTANA PADRE (Importante para Django)
+    const csrfToken = getCookie('csrftoken'); 
 
-        // 2. Generamos el JSON de datos (Útil si a futuro envías esto al backend)
-        const budgetData = {
-            date: currentDate,
-            items: products.map(p => ({ title: p.title, brand: p.marca, price: p.price })),
-            total: total.toFixed(2)
-        };
+    // 3. Datos del presupuesto
+    const budgetDataObj = {
+        date: currentDate,
+        items: products.map(p => ({ title: p.title, brand: p.marca, price: p.price })),
+        total: total.toFixed(2)
+    };
 
-        // 3. Construcción del HTML del documento
-        // Nota: Inyectamos un script dentro del HTML generado para manejar el botón de email
-        const fullHtmlContent = `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Presupuesto - LocalMarket</title>
-                <link rel="icon" type="image/png" href="${baseUrl}/static/img/fav.png">
+    // 4. Construcción del HTML
+    const fullHtmlContent = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Presupuesto - LocalMarket</title>
+            <link rel="icon" type="image/png" href="${baseUrl}/static/img/fav.png">
+            
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f4f4f4; }
+                .budget-container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+                .header { background: linear-gradient(135deg, #f56416 0%, #772014 100%); color: white; padding: 30px; text-align: center; }
+                .header h2 { margin: 0; font-size: 2em; letter-spacing: 1px; }
+                .header p { margin: 5px 0 0; opacity: 0.9; }
+                .meta-info { padding: 20px 30px; border-bottom: 1px solid #eee; color: #666; }
                 
-                <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f4f4f4; }
-                    .budget-container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
-                    .header { background: linear-gradient(135deg, #f56416 0%, #772014 100%); color: white; padding: 30px; text-align: center; }
-                    .header h2 { margin: 0; font-size: 2em; letter-spacing: 1px; }
-                    .header p { margin: 5px 0 0; opacity: 0.9; }
-                    .meta-info { padding: 20px 30px; border-bottom: 1px solid #eee; color: #666; }
-                    
-                    table { width: 100%; border-collapse: collapse; }
-                    th { background: #fff689; color: #772014; padding: 15px; text-align: left; font-weight: 600; }
-                    td { padding: 15px; border-bottom: 1px solid #eee; color: #333; }
-                    tr:last-child td { border-bottom: none; }
-                    .text-right { text-align: right; }
-                    
-                    .footer-total { background: #f9f9f9; padding: 20px 30px; display: flex; justify-content: flex-end; align-items: center; font-size: 1.2em; font-weight: bold; color: #772014; }
-                    
-                    /* Estilos de la zona de acciones (No imprimir) */
-                    .actions-bar {
-                        position: fixed; bottom: 0; left: 0; width: 100%;
-                        background: white; padding: 15px;
-                        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-                        display: flex; justify-content: center; gap: 15px;
-                        z-index: 1000;
-                    }
-                    
-                    .btn {
-                        padding: 12px 25px; border: none; border-radius: 8px;
-                        font-weight: 600; cursor: pointer; font-size: 1em;
-                        display: flex; align-items: center; gap: 8px;
-                        transition: transform 0.2s, opacity 0.2s;
-                    }
-                    .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-                    .btn-print { background-color: #333; color: white; }
-                    .btn-email { background: linear-gradient(135deg, #f56416 0%, #772014 100%); color: white; }
+                table { width: 100%; border-collapse: collapse; }
+                th { background: #fff689; color: #772014; padding: 15px; text-align: left; font-weight: 600; }
+                td { padding: 15px; border-bottom: 1px solid #eee; color: #333; }
+                tr:last-child td { border-bottom: none; }
+                .text-right { text-align: right; }
+                
+                .footer-total { background: #f9f9f9; padding: 20px 30px; display: flex; justify-content: flex-end; align-items: center; font-size: 1.2em; font-weight: bold; color: #772014; }
+                
+                /* Estilos de la zona de acciones */
+                .actions-bar {
+                    position: fixed; bottom: 0; left: 0; width: 100%;
+                    background: white; padding: 15px;
+                    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+                    display: flex; justify-content: center; gap: 15px;
+                    z-index: 1000;
+                }
+                
+                .btn {
+                    padding: 12px 25px; border: none; border-radius: 8px;
+                    font-weight: 600; cursor: pointer; font-size: 1em;
+                    display: flex; align-items: center; gap: 8px;
+                    transition: transform 0.2s, opacity 0.2s;
+                }
+                .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+                .btn-print { background-color: #333; color: white; }
+                .btn-email { background: linear-gradient(135deg, #f56416 0%, #772014 100%); color: white; }
 
-                    @media print {
-                        body { padding: 0; background: white; }
-                        .budget-container { box-shadow: none; border: none; }
-                        .no-print, .actions-bar { display: none !important; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="budget-container">
-                    <div class="header">
-                        <h2>PRESUPUESTO</h2>
-                        <p>LocalMarket</p>
-                    </div>
-                    <div class="meta-info">
-                        <strong>Fecha de emisión:</strong> ${currentDate}
-                    </div>
+                @media print {
+                    body { padding: 0; background: white; }
+                    .budget-container { box-shadow: none; border: none; }
+                    .no-print, .actions-bar { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="budget-container">
+                <div class="header">
+                    <h2>PRESUPUESTO</h2>
+                    <p>LocalMarket</p>
+                </div>
+                <div class="meta-info">
+                    <strong>Fecha de emisión:</strong> ${currentDate}
+                </div>
 
-                    <table>
-                        <thead>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th class="text-right">Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${products.map(p => `
                             <tr>
-                                <th>Producto</th>
-                                <th>Marca</th>
-                                <th class="text-right">Precio</th>
+                                <td>${p.title}</td>
+                                <td>${p.marca || '-'}</td>
+                                <td class="text-right">$${p.price}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${products.map(p => `
-                                <tr>
-                                    <td>${p.title}</td>
-                                    <td>${p.marca || '-'}</td>
-                                    <td class="text-right">$${p.price}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                        `).join('')}
+                    </tbody>
+                </table>
 
-                    <div class="footer-total">
-                        <span>TOTAL: &nbsp;</span>
-                        <span>$${total.toFixed(2)}</span>
-                    </div>
-                    
-                    <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9em;">
-                        Gracias por su confianza
-                    </div>
+                <div class="footer-total">
+                    <span>TOTAL: &nbsp;</span>
+                    <span>$${total.toFixed(2)}</span>
                 </div>
-
-                <div class="actions-bar no-print">
-                    <button onclick="window.print()" class="btn btn-print">
-                        <span>🖨️</span> Imprimir / PDF
-                    </button>
-                    
-                    <button onclick="handleEmailAction()" class="btn btn-email" id="btnEmail">
-                        <span>✉️</span> Enviar por Email
-                    </button>
+                
+                <div style="text-align: center; padding: 20px; color: #999; font-size: 0.9em;">
+                    Gracias por su confianza
                 </div>
+            </div>
 
-                <script>
-                    function handleEmailAction() {
-                        const btn = document.getElementById('btnEmail');
-                        
-                        // OPCIÓN A: Versión actual (Cliente de correo local)
-                        // -------------------------------------------------
-                        const subject = encodeURIComponent("Presupuesto LocalMarket - ${currentDate}");
-                        const body = encodeURIComponent("Hola,\n\nAdjunto le envío el presupuesto solicitado.\n\nPor favor, agregue el PDF generado.\n\nSaludos.");
-                        window.location.href = "mailto:?subject=" + subject + "&body=" + body;
-                        
-                        alert('Se ha abierto tu gestor de correos.\\n\\n1. Guarda este presupuesto como PDF (Botón Imprimir).\\n2. Adjúntalo al correo que se acaba de abrir.');
+            <div class="actions-bar no-print">
+                <button onclick="window.print()" class="btn btn-print">
+                    <span>🖨️</span> Imprimir / PDF
+                </button>
+                
+                <button onclick="handleEmailAction()" class="btn btn-email" id="btnEmail">
+                    <span>✉️</span> Enviar por Email
+                </button>
+            </div>
 
-                        // OPCIÓN B: Integración Backend (Futuro)
-                        // -------------------------------------------------
-                        /*
-                        btn.disabled = true;
-                        btn.innerText = "Enviando...";
-
-                        // Aquí enviarías los datos (budgetData) a Django
-                        const dataToSend = ${JSON.stringify(budgetData)};
-                        
-                        fetch('${baseUrl}/api/enviar-presupuesto-email/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                // Necesitarías manejar el CSRF token aquí si la ventana comparte cookies
-                            },
-                            body: JSON.stringify(dataToSend)
-                        })
-                        .then(response => {
-                            if(response.ok) alert('¡Correo enviado por el servidor!');
-                            else alert('Hubo un error al enviar.');
-                        })
-                        .finally(() => {
-                            btn.disabled = false;
-                            btn.innerText = "✉️ Enviar por Email";
-                        });
-                        */
+            <script>
+                function handleEmailAction() {
+                    const btn = document.getElementById('btnEmail');
+                    
+                    // Pedir email al usuario (opcional, pero recomendado si el usuario no está logueado)
+                    const userEmail = prompt("Ingresa el correo donde quieres recibir el presupuesto:");
+                    
+                    if (!userEmail || !userEmail.includes('@')) {
+                        alert("Debes ingresar un correo válido.");
+                        return;
                     }
-                </script>
-            </body>
-            </html>
-        `;
 
-        // 4. Creación del Blob y apertura de ventana
-        const blob = new Blob([fullHtmlContent], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        const printWindow = window.open(blobUrl, '_blank');
+                    btn.disabled = true;
+                    btn.innerText = "Enviando...";
 
-        if (printWindow) {
-            // Aseguramos el foco para que el usuario vea la nueva pestaña
-            setTimeout(() => { printWindow.focus(); }, 250);
-        } else {
-            showNotification('Habilita las ventanas emergentes para ver el presupuesto', 'warning');
-        }
+                    // Preparamos los datos tal cual los espera la View de Django
+                    const payload = {
+                        budgetData: ${JSON.stringify(budgetDataObj)},
+                        email: userEmail
+                    };
+                    
+                    fetch('${baseUrl}/api/enviar-presupuesto-email/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // INYECTAMOS EL TOKEN CSRF AQUÍ
+                            'X-CSRFToken': '${csrfToken}' 
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // Si hay error, intentamos leer el mensaje del servidor
+                            return response.json().then(errData => {
+                                throw new Error(errData.error || 'Error en el servidor');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if(data.success) {
+                            alert('¡Correo enviado correctamente a ' + userEmail + '!');
+                        } else {
+                            alert('Error: ' + (data.error || 'Desconocido'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('Hubo un error al enviar: ' + error.message);
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerText = "✉️ Enviar por Email";
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    `;
 
-        showNotification('Presupuesto generado correctamente', 'success');
+    // 5. Crear Blob y abrir ventana
+    const blob = new Blob([fullHtmlContent], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(blobUrl, '_blank');
+
+    if (printWindow) {
+        setTimeout(() => { printWindow.focus(); }, 250);
+    } else {
+        showNotification('Habilita las ventanas emergentes', 'warning');
     }
+
+    showNotification('Presupuesto generado', 'success');
+}
     // ==================== SISTEMA DE CARRITO ====================
 
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
