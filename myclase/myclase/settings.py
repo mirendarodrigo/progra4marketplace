@@ -166,3 +166,10 @@ LOGGING = {
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 LOGOUT_REDIRECT_URL = '/'
+# Configuración de Email para Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mirendarodrigo@gmail.com' 
+EMAIL_HOST_PASSWORD = 'qlaj sfsi sgpv qbdi'  

@@ -20,4 +20,5 @@ urlpatterns = [
 
     path("api/notifications/seen/", views.mark_notifications_seen, name="mark_notifications_seen"),
     path('sesion-expirada/', views.session_expired, name='session_expired'),
+    path('api/enviar-presupuesto-email/', views.send_budget_email, name='send_budget_email'),
 ]

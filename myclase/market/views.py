@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from core.decorators import require_complete_profile
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-
+from .utils import enviar_presupuesto_email
 
 def session_expired(request):
     return render(request, 'market/session_expired.html')
@@ -459,3 +459,36 @@ def mark_notifications_seen(request):
         "updated": updated,
         "counts": counts,
     })
+# ============================ EMAIL==================================================
+def send_budget_email(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            budget_data = data.get('budgetData')
+            
+            # --- CORRECCIÓN AQUÍ ---
+            
+            # 1. Prioridad absoluta: El email que escribiste en el prompt (frontend)
+            email_destino = data.get('email')
+            
+            # 2. Respaldo: Solo si no escribiste nada Y estás logueado, usa tu email
+            if not email_destino and request.user.is_authenticated:
+                 email_destino = request.user.email
+
+            # Validación final
+            if not email_destino:
+                return JsonResponse({'success': False, 'error': 'No se definió un email de destino'})
+
+            # -----------------------
+
+            # Enviamos al destinatario correcto
+            enviar_presupuesto_email(budget_data, email_destino)
+            
+            return JsonResponse({'success': True, 'message': 'Correo enviado'})
+            
+        except Exception as e:
+            print(e)
+            return JsonResponse({'success': False, 'error': str(e)})
+            
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
