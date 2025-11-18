@@ -88,6 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (product) {
                     addToCartSystem(product);
                     showNotification(`"${product.title}" agregado al carrito`, 'success');
+                    // opcional: también podríamos notificar aquí con notifySellerCartAdd(product);
                 }
             });
         });
@@ -137,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showNotification('Producto eliminado de favoritos', 'info');
     }
 
-    // Helper para UI del botón favoritos
+    // Helper para UI del botón favoritos (versión del panel)
     function updateFavBtnUI(btn, isActive) {
         const icon = btn.querySelector('i');
         if (isActive) {
@@ -390,7 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
             item.quantity += change;
 
             if (item.quantity <= 0) {
-                removeFromCart(id);
+                // al ir a 0, eliminamos y notificamos
+                removeFromCart(id);   // <<< notifySellerCartRemove se llama dentro
                 return;
             }
 
@@ -400,7 +402,49 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ===============================
+    // Notificar "QUITADO DEL CARRITO" (global)
+    // ===============================
+    async function notifySellerCartRemove(product) {   // <<<
+        const productId = product?.pk || product?.id || product?.product_id;
+
+        if (!productId) {
+            console.warn('notifySellerCartRemove: no se encontró productId válido en', product);
+            return;
+        }
+
+        const quantity = product.quantity ? product.quantity : 1;
+
+        try {
+            const res = await fetch('/api/event/cart-remove/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity,
+                }),
+            });
+
+            if (!res.ok) {
+                console.error('Error al notificar cart-remove:', res.status);
+            } else {
+                const data = await res.json().catch(() => null);
+                console.log('Respuesta notifySellerCartRemove:', data);
+            }
+        } catch (err) {
+            console.warn('No se pudo registrar notificación de cart-remove', err);
+        }
+    }
+
     function removeFromCart(id) {
+        // buscamos el item ANTES de eliminarlo, para poder notificar
+        const item = cart.find(i => i.id === id);      // <<<
+        if (item) {
+            notifySellerCartRemove(item);              // <<<
+        }
+
         cart = cart.filter(item => item.id !== id);
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartBadge();
@@ -413,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (cart.length === 0) return;
 
             if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+                // si quisieras, acá podrías iterar y notificar cart-remove de todos
                 cart = [];
                 localStorage.setItem('cart', JSON.stringify(cart));
                 updateCartBadge();
@@ -522,6 +567,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const productModalElement = document.getElementById('productModal');
 
+    // Helper para el botón de favoritos del modal (versión simple)
+    function updateFavBtnUI(btn, isFav) {
+        if (!btn) return;
+        const icon = btn.querySelector('i');
+        if (isFav) {
+            btn.classList.add('active');
+            if (icon) icon.className = 'bi bi-star-fill';
+        } else {
+            btn.classList.remove('active');
+            if (icon) icon.className = 'bi bi-star';
+        }
+    }
+
+    // 👉 Helper para notificar al backend que alguien agregó un producto al carrito
+    //    Necesita que la card tenga data-product-id con el pk real del producto.
+    async function notifySellerCartAdd(product) {
+        // Intentamos obtener el ID real del producto
+        const productId = product?.pk || product?.id || product?.product_id;
+
+        if (!productId) {
+            console.warn('notifySellerCartAdd: no se encontró productId válido en', product);
+            return;
+        }
+
+        // Si existe un input de cantidad en el modal, lo usamos. Si no, 1 por defecto.
+        let quantity = 1;
+        const qtyInput = document.getElementById('modal-quantity-input');
+        if (qtyInput) {
+            const parsed = parseInt(qtyInput.value, 10);
+            if (!isNaN(parsed) && parsed > 0) {
+                quantity = parsed;
+            }
+        }
+
+        try {
+            const res = await fetch('/api/event/cart-add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // La vista está @csrf_exempt, así que no hace falta CSRF acá
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity,
+                }),
+            });
+
+            if (!res.ok) {
+                console.error('Error al notificar cart-add:', res.status);
+            } else {
+                const data = await res.json().catch(() => null);
+                console.log('Respuesta notifySellerCartAdd:', data);
+            }
+        } catch (err) {
+            console.warn('No se pudo registrar notificación de carrito', err);
+        }
+    }
+
     if (productModalElement) {
         const modalInstance = new bootstrap.Modal(productModalElement);
 
@@ -556,18 +659,16 @@ document.addEventListener("DOMContentLoaded", () => {
             if (chatBtn) {
                 if (productContext) {
                     chatBtn.classList.remove('d-none');
-                    // Limpiamos eventos anteriores clonando o reasignando
                     chatBtn.onclick = function () {
                         const params = new URLSearchParams({
                             product: productContext.id || '',
                             title: productContext.title || '',
                             price: productContext.price || '',
-                            brand: productContext.marca || ''
+                            brand: productContext.marca || '',
                         });
                         window.location.href = `/chat/start/${sellerId}/?${params.toString()}`;
                     };
                 } else {
-                    // Si abrimos el modal sin contexto de producto, ocultamos el botón
                     chatBtn.classList.add('d-none');
                 }
             }
@@ -576,28 +677,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // 3. Fetch de datos extra
             fetch(`/api/seller/${sellerId}/`, { headers: { 'Accept': 'application/json' } })
-                .then(r => r.ok ? r.json() : Promise.reject(r))
+                .then(r => (r.ok ? r.json() : Promise.reject(r)))
                 .then(data => {
                     if (nameEl && data.name) nameEl.textContent = data.name;
                     if (emailEl) emailEl.textContent = data.email || '—';
                     if (locEl) locEl.textContent = data.localidad || '—';
                     if (telEl) telEl.textContent = data.telefono || '—';
-                    if (countEl) countEl.textContent = (data.products_count != null) ? data.products_count : 0;
+                    if (countEl) countEl.textContent = data.products_count != null ? data.products_count : 0;
                 })
-                .catch(err => console.error("Error cargando vendedor", err));
+                .catch(err => console.error('Error cargando vendedor', err));
         };
 
         function openProductModal(cardElement) {
-            // 1. OBTENER DATOS 
-            const img = cardElement.querySelector('.product-img')?.src || cardElement.querySelector('img')?.src || '';
+            // 1. OBTENER DATOS
+            const img =
+                cardElement.querySelector('.product-img')?.src ||
+                cardElement.querySelector('img')?.src ||
+                '';
 
-            const title = cardElement.dataset.title || (cardElement.querySelector('.product-title')?.textContent || '').trim();
+            const title =
+                cardElement.dataset.title ||
+                (cardElement.querySelector('.product-title')?.textContent || '').trim();
 
-            let rawPrice = cardElement.dataset.price || (cardElement.querySelector('.product-price')?.textContent || '');
+            let rawPrice =
+                cardElement.dataset.price ||
+                (cardElement.querySelector('.product-price')?.textContent || '');
             const price = rawPrice.replace('$', '').replace(',', '.').trim();
 
-            const description = cardElement.dataset.description || (cardElement.querySelector('.product-description')?.textContent || '').trim();
-            const brand = cardElement.dataset.brand || (cardElement.querySelector('.product-brand')?.textContent || '').replace('Marca:', '').trim();
+            const description =
+                cardElement.dataset.description ||
+                (cardElement.querySelector('.product-description')?.textContent || '').trim();
+
+            const brand =
+                cardElement.dataset.brand ||
+                (cardElement.querySelector('.product-brand')?.textContent || '')
+                    .replace('Marca:', '')
+                    .trim();
 
             let sellerId = cardElement.dataset.sellerId;
             let sellerName = cardElement.dataset.sellerName;
@@ -605,20 +720,24 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!sellerId) {
                 const cardSellerBtn = cardElement.querySelector('button[data-seller-id]');
                 sellerId = cardSellerBtn?.dataset.sellerId || '';
-                sellerName = cardSellerBtn?.dataset.sellerName ||
+                sellerName =
+                    cardSellerBtn?.dataset.sellerName ||
                     (cardElement.querySelector('.product-seller')?.textContent.trim() || 'Vendedor');
             }
 
-            const productId = title.toLowerCase().replace(/\s+/g, '-');
+            // pk REAL desde data-product-id y un slug para favoritos/carrito
+            const productPk = cardElement.dataset.productId || ''; // 👈 IMPORTANTE
+            const productSlugId = title.toLowerCase().replace(/\s+/g, '-');
 
-            // Objeto producto
+            // Objeto producto (incluye pk para notificar al backend)
             const productObj = {
-                id: productId,
+                id: productSlugId, // se usa en favoritos / carrito (localStorage)
+                pk: productPk, // se usa para notificaciones backend
                 title: title,
                 price: price,
                 image: img,
                 marca: brand,
-                seller: sellerName
+                seller: sellerName,
             };
 
             // 2. RELLENAR LA UI DEL MODAL
@@ -646,6 +765,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 addToCartBtn.onclick = function () {
                     addToCartSystem(productObj);
                     showNotification(`"${title}" agregado al carrito`, 'success');
+
+                    // 👇 AQUÍ NOTIFICAMOS AL BACKEND QUE ALGUIEN AGREGÓ ESTE PRODUCTO AL CARRITO
+                    notifySellerCartAdd(productObj);
+
                     modalInstance.hide();
                 };
             }
@@ -653,13 +776,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // 4. CONFIGURAR BOTÓN "FAVORITOS"
             const modalFavBtn = document.getElementById('modal-favorite-btn');
             if (modalFavBtn) {
-                const isFav = favorites.some(f => f.id === productId);
+                const isFav = favorites.some(f => f.id === productSlugId);
                 updateFavBtnUI(modalFavBtn, isFav);
 
                 modalFavBtn.onclick = function () {
-                    const currentFavState = favorites.some(f => f.id === productId);
+                    const currentFavState = favorites.some(f => f.id === productSlugId);
                     if (currentFavState) {
-                        removeFromFavorites(productId);
+                        removeFromFavorites(productSlugId);
                         updateFavBtnUI(modalFavBtn, false);
                     } else {
                         addToFavorites(productObj);
@@ -673,7 +796,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (sellerProfileBtn) {
                 sellerProfileBtn.disabled = !sellerId;
                 sellerProfileBtn.onclick = function () {
-                    // IMPORTANTE: Pasamos el productObj para que el chat funcione
                     if (sellerId) window.openSellerModalById(sellerId, sellerName, productObj);
                 };
             }
@@ -684,17 +806,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- HELPERS PARA CREAR CONTEXTO DESDE LA TARJETA (PARA BOTÓN VENDEDOR) ---
         function getContextFromCard(card) {
-            const title = card.dataset.title || (card.querySelector('.product-title')?.textContent || '').trim();
-            let rawPrice = card.dataset.price || (card.querySelector('.product-price')?.textContent || '');
+            const title =
+                card.dataset.title ||
+                (card.querySelector('.product-title')?.textContent || '').trim();
+            let rawPrice =
+                card.dataset.price ||
+                (card.querySelector('.product-price')?.textContent || '');
             const price = rawPrice.replace('$', '').replace(',', '.').trim();
-            const brand = card.dataset.brand || (card.querySelector('.product-brand')?.textContent || '').replace('Marca:', '').trim();
-            const productId = title.toLowerCase().replace(/\s+/g, '-');
+            const brand =
+                card.dataset.brand ||
+                (card.querySelector('.product-brand')?.textContent || '')
+                    .replace('Marca:', '')
+                    .trim();
+            const productSlugId = title.toLowerCase().replace(/\s+/g, '-');
+            const productPk = card.dataset.productId || '';
 
             return {
-                id: productId,
+                id: productSlugId,
+                pk: productPk,
                 title: title,
                 price: price,
-                marca: brand
+                marca: brand,
             };
         }
 
@@ -702,7 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const productCards = document.querySelectorAll('.product-card');
         if (productCards.length > 0) {
             productCards.forEach(card => {
-                card.addEventListener('click', (e) => {
+                card.addEventListener('click', e => {
                     // 1. ¿El clic fue en el botón del vendedor?
                     const sellerBtn = e.target.closest('button[data-seller-id]');
                     if (sellerBtn) {
@@ -711,14 +843,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         const sId = sellerBtn.dataset.sellerId;
                         const sName = sellerBtn.dataset.sellerName;
-                        const context = getContextFromCard(card); // Obtenemos datos del producto
+                        const context = getContextFromCard(card);
 
                         window.openSellerModalById(sId, sName, context);
                         return;
                     }
                     // 2. Si es otro botón/enlace, ignorar
                     if (e.target.closest('button') || e.target.closest('a')) return;
-                    
+
                     // 3. Abrir modal de producto
                     openProductModal(card);
                 });
@@ -729,20 +861,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const homeCards = document.querySelectorAll('.carousel-card-trigger');
         if (homeCards.length > 0) {
             homeCards.forEach(card => {
-                card.addEventListener('click', (e) => {
-                    // Misma lógica para el botón vendedor si existiera en el Home (aunque ahí está oculto)
+                card.addEventListener('click', e => {
                     const sellerBtn = e.target.closest('button[data-seller-id]');
                     if (sellerBtn) {
-                        e.stopPropagation(); e.preventDefault();
-                        // En Home los datos están en dataset del contenedor principal (card), no botones internos
-                        // pero el helper getContextFromCard maneja dataset también.
+                        e.stopPropagation();
+                        e.preventDefault();
                         const context = getContextFromCard(card);
                         const sId = sellerBtn.dataset.sellerId || card.dataset.sellerId;
                         const sName = sellerBtn.dataset.sellerName || card.dataset.sellerName;
                         window.openSellerModalById(sId, sName, context);
                         return;
                     }
-                    
+
                     if (e.target.closest('button') || e.target.closest('a')) return;
                     openProductModal(card);
                 });
@@ -750,7 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ==================== MODAL DEL VENDEDOR (Clicks externos) ====================
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', e => {
             const btn = e.target.closest('#modal-seller-btn');
             if (btn) {
                 e.stopPropagation();
@@ -801,7 +931,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sortOptions) {
         sortOptions.addEventListener("change", performSearchAndSort);
     }
-
 
     // ==================== ADD/MOD PRODUCT - PREVIEW DE IMAGEN ====================
 
@@ -894,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 }); // <-- Cierre correcto del DOMContentLoaded
+
 
 
     // ==================== BÚSQUEDA POR VOZ ====================

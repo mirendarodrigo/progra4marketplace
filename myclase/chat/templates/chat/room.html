@@ -84,14 +84,26 @@
              href="{% url 'chat:room' c.id %}">
             <div class="d-flex align-items-center gap-2">
               <div class="rounded bg-light border px-2 py-1 fw-bold text-primary">
-                {% for u in c.participants.all %}{% if u.id != request.user.id %}{{ u.username|slice:":2"|upper }}{% endif %}{% endfor %}
-              </div>
-              <div>
                 {% for u in c.participants.all %}
                   {% if u.id != request.user.id %}
-                    <div class="fw-semibold">{{ u.get_full_name|default:u.username }}</div>
+                    {{ u.username|slice:":2"|upper }}
                   {% endif %}
                 {% endfor %}
+              </div>
+              <div>
+                {# === Nombre + badge de no leídos === #}
+                <div class="fw-semibold d-flex align-items-center gap-1">
+                  {% for u in c.participants.all %}
+                    {% if u.id != request.user.id %}
+                      {{ u.get_full_name|default:u.username }}
+                    {% endif %}
+                  {% endfor %}
+                  {% if c.unread_count %}
+                    <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.7rem;">
+                      {{ c.unread_count }}
+                    </span>
+                  {% endif %}
+                </div>
                 <div class="small text-muted">#{{ c.id }}</div>
               </div>
             </div>
@@ -107,7 +119,11 @@
   <section class="chat-room d-flex flex-column">
     <div class="room-top">
       <div class="avatar">
-        {% for u in conversation.participants.all %}{% if u.id != request.user.id %}{{ u.username|slice:":2"|upper }}{% endif %}{% endfor %}
+        {% for u in conversation.participants.all %}
+          {% if u.id != request.user.id %}
+            {{ u.username|slice:":2"|upper }}
+          {% endif %}
+        {% endfor %}
       </div>
       <div>
         <div class="fw-bold">
