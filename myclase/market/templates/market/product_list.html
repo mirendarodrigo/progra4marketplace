@@ -31,47 +31,50 @@
     </form>
 </div>
 
-  <div class="row products-container grid-view">
-    {% for p in products %}
-    
-    <div class="col-md-4 mb-4 product-item">
-      <div class="card h-100 shadow-sm product-card" 
-           style="cursor: pointer;"
-           data-seller-id="{{ p.seller.id }}"
-           data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
+<div class="row products-container grid-view">
+  {% for p in products %}
+  
+  <div class="col-md-4 mb-4 product-item">
+    <div class="card h-100 shadow-sm product-card" 
+         style="cursor: pointer;"
+         data-product-id="{{ p.id }}"
+         data-seller-id="{{ p.seller.id }}"
+         data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
+      
+      {% if p.image %}
+      <img src="{{ p.image.url }}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="{{ p.title }}">
+      {% else %}
+      <img src="{% static 'img/placeholder.png' %}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="Sin imagen">
+      {% endif %}
+      
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title product-title fw-bold text-truncate">{{ p.title }}</h5>
+        <p class="card-text product-brand text-muted small mb-2">Marca: {{ p.marca|default:"Genérica" }}</p>
+        <h4 class="product-price text-primary fw-bold mb-3">${{ p.price|floatformat:2 }}</h4>
         
-        {% if p.image %}
-        <img src="{{ p.image.url }}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="{{ p.title }}">
-        {% else %}
-        <img src="{% static 'img/placeholder.png' %}" class="card-img-top product-img object-fit-cover" style="height: 250px;" alt="Sin imagen">
-        {% endif %}
-        
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title product-title fw-bold text-truncate">{{ p.title }}</h5>
-          <p class="card-text product-brand text-muted small mb-2">Marca: {{ p.marca|default:"Genérica" }}</p>
-          <h4 class="product-price text-primary fw-bold mb-3">${{ p.price|floatformat:2 }}</h4>
-          
-          <p class="d-none product-description">{{ p.description }}</p>
+        <p class="d-none product-description">{{ p.description }}</p>
 
-          <div class="mt-auto">
-             <small class="product-seller d-block">
-                <button  class="btn btn-outline-secondary btn-sm w-50 text-start" 
-                        data-seller-id="{{ p.seller.id }}"
-                        data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
-                  <i class="bi bi-person-circle me-1"></i>
-                  {{ p.seller.get_full_name|default:p.seller.username }}
-                </button>
-             </small>
-          </div>
+        <div class="mt-auto">
+          <small class="product-seller d-block">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm w-50 text-start"
+                    data-seller-id="{{ p.seller.id }}"
+                    data-seller-name="{{ p.seller.get_full_name|default:p.seller.username }}">
+              <i class="bi bi-person-circle me-1"></i>
+              {{ p.seller.get_full_name|default:p.seller.username }}
+            </button>
+          </small>
         </div>
       </div>
     </div>
-    {% empty %}
-      <div class="col-12 text-center py-5">
-        <p class="fs-4 text-muted">No se encontraron productos.</p>
-      </div>
-    {% endfor %}
   </div>
+  {% empty %}
+    <div class="col-12 text-center py-5">
+      <p class="fs-4 text-muted">No se encontraron productos.</p>
+    </div>
+  {% endfor %}
+</div>
+
 </div>
 
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">

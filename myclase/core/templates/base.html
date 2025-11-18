@@ -16,6 +16,32 @@
   <link rel="stylesheet" href="{% static 'scanner/scanner.css' %}">
   <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
 
+  {# 🔧 Ajuste específico para el globito del avatar #}
+  <style>
+    /* El botón del avatar será el contenedor relativo del badge */
+    #userAvatarBtn {
+      position: relative;
+    }
+
+    /* Globo de notificación sobre el avatar */
+    .user-notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      z-index: 9999;
+      /* por encima del z-index:10 del .navbar-avatar */
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      border-radius: 999px;
+      pointer-events: none;
+      /* no bloquea el click en el avatar */
+    }
+  </style>
 </head>
 
 <body class="bg-dark-subtle text-dark">
@@ -47,7 +73,7 @@
     <!-- Iconos de usuario (Derecha) -->
     {% if request.path == '/' and user.is_authenticated %}
     <h2 class="fw-bold text-dark mb-3">¡Hola, {{ user.first_name|default:user.username }}!</h2>
-    {%endif%}
+    {% endif %}
     <ul class="d-flex align-items-center gap-2 mb-0">
       {% if user.is_authenticated %}
       <!-- Avatar -->
@@ -55,6 +81,12 @@
       <li id="userButton" class="position-relative user-avatar-container">
         <button class="icon-btn avatar-btn" id="userAvatarBtn" title="Usuario">
           <img src="{{ user_avatar_url }}" alt="Avatar" class="navbar-avatar">
+
+          {# Globo de notificación general (productos + mensajes) #}
+          <span id="notifNavBadge"
+            class="notification-badge user-notif-badge {% if not user_nav_total_unread %}d-none{% endif %}">
+            {{ user_nav_total_unread|default:"" }}
+          </span>
         </button>
 
         <!-- Dropdown del usuario -->
@@ -68,13 +100,27 @@
             <i class="bi bi-person-circle"></i> Mi perfil
           </a>
 
-          <a href="{% url 'chat:inbox' %}" class="user-dropdown-item">
-            <i class="bi bi-chat-dots"></i> Chat
+          <a href="{% url 'chat:inbox' %}" class="user-dropdown-item d-flex justify-content-between align-items-center">
+            <span>
+              <i class="bi bi-chat-dots"></i> Chat
+            </span>
+            {% if user_messages_unread_count %}
+            <span class="badge bg-danger rounded-pill">
+              {{ user_messages_unread_count }}
+            </span>
+            {% endif %}
+          </a>
+
+          <a href="{% url 'market:seller_products' %}"
+            class="user-dropdown-item d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-box-seam"></i> Mis productos</span>
+            {% if user_products_unread_count %}
+            <span class="badge bg-danger rounded-pill">{{ user_products_unread_count }}</span>
+            {% endif %}
           </a>
 
         </div>
       </li>
-
 
       <!-- Carrito -->
       <li class="position-relative cart-container">
@@ -163,6 +209,7 @@
       </li>
       {% endif %}
     </ul>
+
   </nav>
 
   <main class="container"> {% block content %}{% endblock %} </main>

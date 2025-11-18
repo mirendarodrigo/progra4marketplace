@@ -97,6 +97,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "market.context_processors.user_avatar",
                 'profiles.context_processors.avatar',
+                "market.context_processors.product_notifications",
+                "core.context_processors.navbar_notifications"
             ],
         },
     },

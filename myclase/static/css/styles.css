@@ -324,6 +324,7 @@
 }
 
 #userAvatarBtn {
+  position: relative;              /* 👈 NUEVO */
   background-color: transparent !important;
   border-color: transparent !important;
   border-radius: 50%;
@@ -364,6 +365,22 @@
   position: relative;
   z-index: 10;
   flex-shrink: 0;
+}
+
+.user-notif-badge {
+  position: absolute;
+  top: -4px;        /* ajustá fino según cómo lo veas */
+  right: -4px;      /* más o menos arriba a la derecha del avatar */
+  z-index: 20;      /* 👈 más que el z-index:10 de .navbar-avatar */
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  border-radius: 999px;
+  pointer-events: none; /* no bloquea el click al avatar */
 }
 
 /* Dropdown del avatar */

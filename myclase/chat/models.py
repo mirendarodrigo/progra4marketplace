@@ -17,8 +17,8 @@ class Message(models.Model):
         Conversation,
         on_delete=models.CASCADE,
         related_name='messages',
-        null=True,      # <- temporal
-        blank=True,     # <- temporal
+        null=True,      # <- si ya no lo necesitás, luego podés quitar null/blank
+        blank=True,
     )
     sender = models.ForeignKey(
         User,
@@ -32,6 +32,9 @@ class Message(models.Model):
         null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # 👇 NUEVO: para saber si el receptor ya lo leyó
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['created_at']

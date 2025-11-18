@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mis productos - LocalMarket{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-dark">Mis productos</h2>
+    <a href="{% url 'market:add_product' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Publicar producto
+    </a>
+  </div>
+
+  {# ==================== RESUMEN ==================== #}
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0" style="border-radius: 16px;">
+        <div class="card-body">
+          <h6 class="text-uppercase text-muted mb-2">Resumen</h6>
+          <p class="mb-1">
+            <strong>Total publicados:</strong> {{ my_products|length }}
+          </p>
+          <p class="mb-0">
+            <strong>Notificaciones nuevas:</strong>
+            <span id="notifTotalCount">{{ user_products_unread_count|default:"0" }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ==================== NOTIFICACIONES – BOTONES DESPLEGABLES ==================== #}
+  <div class="card shadow-sm border-0 mb-4" style="border-radius: 16px;">
+    <div class="card-body">
+      <h5 class="mb-3">Actividad de mis productos</h5>
+
+      <div class="accordion" id="notificationsAccordion">
+
+        {# 🛒 Agregados al carrito #}
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header" id="headingCart">
+            <button class="accordion-button py-2" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCart"
+                    aria-expanded="true"
+                    aria-controls="collapseCart">
+              <span class="me-2">🛒 Agregados al carrito</span>
+              {% if notifications_cart_unseen_count %}
+                <span id="badgeCart" class="badge rounded-pill bg-warning text-dark ms-2">
+                  {{ notifications_cart_unseen_count }}
+                </span>
+              {% else %}
+                <span id="badgeCart" class="badge rounded-pill bg-warning text-dark ms-2 d-none">0</span>
+              {% endif %}
+            </button>
+          </h2>
+          <div id="collapseCart"
+               class="accordion-collapse collapse show"
+               aria-labelledby="headingCart"
+               data-bs-parent="#notificationsAccordion">
+            <div class="accordion-body pt-2">
+              {% if notifications_cart %}
+                <div style="max-height: 250px; overflow-y: auto;">
+                  <ul class="list-group list-group-flush">
+                    {% for n in notifications_cart %}
+                      <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="fw-semibold">🛒 Agregaron a carrito</div>
+                          <div class="small text-muted">
+                            Producto: {{ n.product.title }}<br>
+                            Cantidad: {{ n.quantity }}<br>
+                            {% if n.buyer %}
+                              Comprador: {{ n.buyer.get_full_name|default:n.buyer.username }}
+                            {% endif %}
+                          </div>
+                        </div>
+                        <small class="text-muted">{{ n.created_at|date:"d/m H:i" }}</small>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% else %}
+                <div class="text-muted small">Sin productos agregados recientemente.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {# ❌ Quitados del carrito #}
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header" id="headingCartRemove">
+            <button class="accordion-button collapsed py-2" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseCartRemove"
+                    aria-expanded="false"
+                    aria-controls="collapseCartRemove">
+              <span class="me-2">❌ Quitados del carrito</span>
+              {% if notifications_cart_remove_unseen_count %}
+                <span id="badgeCartRemove" class="badge rounded-pill bg-danger ms-2">
+                  {{ notifications_cart_remove_unseen_count }}
+                </span>
+              {% else %}
+                <span id="badgeCartRemove" class="badge rounded-pill bg-danger ms-2 d-none">0</span>
+              {% endif %}
+            </button>
+          </h2>
+          <div id="collapseCartRemove"
+               class="accordion-collapse collapse"
+               aria-labelledby="headingCartRemove"
+               data-bs-parent="#notificationsAccordion">
+            <div class="accordion-body pt-2">
+              {% if notifications_cart_remove %}
+                <div style="max-height: 250px; overflow-y: auto;">
+                  <ul class="list-group list-group-flush">
+                    {% for n in notifications_cart_remove %}
+                      <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="fw-semibold">❌ Quitado del carrito</div>
+                          <div class="small text-muted">
+                            Producto: {{ n.product.title }}<br>
+                            Cantidad: {{ n.quantity }}<br>
+                            {% if n.buyer %}
+                              Usuario: {{ n.buyer.get_full_name|default:n.buyer.username }}
+                            {% endif %}
+                          </div>
+                        </div>
+                        <small class="text-muted">{{ n.created_at|date:"d/m H:i" }}</small>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% else %}
+                <div class="text-muted small">Nadie quitó productos del carrito últimamente.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {# ✅ Compras realizadas #}
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header" id="headingPurchase">
+            <button class="accordion-button collapsed py-2" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapsePurchase"
+                    aria-expanded="false"
+                    aria-controls="collapsePurchase">
+              <span class="me-2">✅ Compras realizadas</span>
+              {% if notifications_purchase_unseen_count %}
+                <span id="badgePurchase" class="badge rounded-pill bg-success ms-2">
+                  {{ notifications_purchase_unseen_count }}
+                </span>
+              {% else %}
+                <span id="badgePurchase" class="badge rounded-pill bg-success ms-2 d-none">0</span>
+              {% endif %}
+            </button>
+          </h2>
+          <div id="collapsePurchase"
+               class="accordion-collapse collapse"
+               aria-labelledby="headingPurchase"
+               data-bs-parent="#notificationsAccordion">
+            <div class="accordion-body pt-2">
+              {% if notifications_purchase %}
+                <div style="max-height: 250px; overflow-y: auto;">
+                  <ul class="list-group list-group-flush">
+                    {% for n in notifications_purchase %}
+                      <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="fw-semibold">✅ Compra realizada</div>
+                          <div class="small text-muted">
+                            Producto: {{ n.product.title }}<br>
+                            Cantidad: {{ n.quantity }}<br>
+                            {% if n.buyer %}
+                              Comprador: {{ n.buyer.get_full_name|default:n.buyer.username }}
+                            {% endif %}
+                          </div>
+                        </div>
+                        <small class="text-muted">{{ n.created_at|date:"d/m H:i" }}</small>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% else %}
+                <div class="text-muted small">Sin compras recientes.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div> {# /accordion #}
+    </div>
+  </div>
+
+  {# ==================== LISTADO DE PRODUCTOS ==================== #}
+  <div class="card shadow-sm border-0" style="border-radius: 16px;">
+    <div class="card-body">
+      <h5 class="mb-3">Listado de mis productos</h5>
+      {% if my_products %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in my_products %}
+                <tr>
+                  <td style="width:80px;">
+                    {% if p.image %}
+                      <img src="{{ p.image.url }}" alt="{{ p.title }}" class="img-thumbnail" style="max-width:70px;">
+                    {% else %}
+                      <span class="text-muted small">Sin imagen</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <strong>{{ p.title }}</strong><br>
+                    <small class="text-muted">Marca: {{ p.marca|default:"-" }}</small>
+                  </td>
+                  <td>${{ p.price }}</td>
+                  <td>{{ p.stock }}</td>
+
+                  {# Estado publicado / dado de baja #}
+                  <td>
+                    {% if p.active %}
+                      <span class="badge bg-success">Publicado</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Baja</span>
+                    {% endif %}
+                  </td>
+
+                  {# Acciones: editar + activar/desactivar + eliminar #}
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                      <a href="{% url 'market:mod_product' p.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Editar
+                      </a>
+
+                      <form method="post"
+                            action="{% url 'market:toggle_product_active' p.id %}"
+                            onsubmit="return confirm('¿Seguro que querés cambiar el estado de este producto?');">
+                        {% csrf_token %}
+                        {% if p.active %}
+                          <input type="hidden" name="action" value="deactivate">
+                          <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-eye-slash"></i> Dar de baja
+                          </button>
+                        {% else %}
+                          <input type="hidden" name="action" value="activate">
+                          <button type="submit" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-eye"></i> Publicar
+                          </button>
+                        {% endif %}
+                      </form>
+
+                      <form method="post"
+                            action="{% url 'market:delete_product' p.id %}"
+                            onsubmit="return confirm('¿Seguro que querés eliminar DEFINITIVAMENTE este producto? Esta acción no se puede deshacer.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">
+                          <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Todavía no publicaste productos.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# ==================== JS: marcar notificaciones como vistas al abrir acordeón ==================== #}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    async function markNotificationsSeen(type) {
+      try {
+        const res = await fetch("{% url 'market:mark_notifications_seen' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: type }),
+        });
+
+        if (!res.ok) {
+          console.error('Error HTTP al marcar notificaciones como vistas:', res.status);
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.ok || !data.counts) return;
+
+        const counts = data.counts;
+
+        // Actualizar contador total en el resumen
+        const totalSpan = document.getElementById('notifTotalCount');
+        if (totalSpan) {
+          totalSpan.textContent = counts.total ?? 0;
+        }
+
+        // Actualizar globito del botón del avatar
+        const navBadge = document.getElementById('notifNavBadge');
+        if (navBadge) {
+          const total = counts.total ?? 0;
+          if (total <= 0) {
+            navBadge.classList.add('d-none');
+            navBadge.textContent = '';
+          } else {
+            navBadge.classList.remove('d-none');
+            navBadge.textContent = total;
+          }
+        }
+
+        // Helper para actualizar badge individual del acordeón
+        function updateBadge(id, value) {
+          const badge = document.getElementById(id);
+          if (!badge) return;
+          const v = value ?? 0;
+          badge.textContent = v;
+          if (v <= 0) {
+            badge.classList.add('d-none');
+          } else {
+            badge.classList.remove('d-none');
+          }
+        }
+
+        // Actualizar el que corresponda
+        if (!type || type === 'cart') {
+          updateBadge('badgeCart', counts.cart);
+        }
+        if (!type || type === 'cart_remove') {
+          updateBadge('badgeCartRemove', counts.cart_remove);
+        }
+        if (!type || type === 'purchase') {
+          updateBadge('badgePurchase', counts.purchase);
+        }
+
+      } catch (err) {
+        console.error('Error marcando notificaciones como vistas:', err);
+      }
+    }
+
+    const collapseCart = document.getElementById('collapseCart');
+    if (collapseCart) {
+      collapseCart.addEventListener('show.bs.collapse', function () {
+        markNotificationsSeen('cart');
+      });
+
+      if (collapseCart.classList.contains('show')) {
+        const badgeCart = document.getElementById('badgeCart');
+        if (badgeCart && !badgeCart.classList.contains('d-none')) {
+          markNotificationsSeen('cart');
+        }
+      }
+    }
+
+    const collapseCartRemove = document.getElementById('collapseCartRemove');
+    if (collapseCartRemove) {
+      collapseCartRemove.addEventListener('show.bs.collapse', function () {
+        markNotificationsSeen('cart_remove');
+      });
+    }
+
+    const collapsePurchase = document.getElementById('collapsePurchase');
+    if (collapsePurchase) {
+      collapsePurchase.addEventListener('show.bs.collapse', function () {
+        markNotificationsSeen('purchase');
+      });
+    }
+
+  });
+</script>
+{% endblock %}
