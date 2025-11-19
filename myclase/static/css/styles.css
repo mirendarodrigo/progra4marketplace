@@ -138,7 +138,7 @@
   position: absolute;
   align-items: center;
   justify-content: space-between;
-  outline: solid 2px greenyellow;
+
 }
 
 .carousel-control-next, .carousel-control-prev {
