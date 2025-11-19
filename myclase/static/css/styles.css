@@ -6,6 +6,7 @@
   --maize: #fff689ff;
 }
 
+
 /* ------------------------ CARRUSEL ------------------------ */
 
 .carousel-inner {
@@ -241,25 +242,32 @@
   align-items: center;
   margin: 0 2rem;
 }
+.navserchContent{
+  width: 100%;
+  justify-content: center !important;
+  align-items: center !important;
+  position: absolute;
+  display: flex;
 
+}
 .form-control.navbar-search-input.me-2 {
-  margin-top: 0;
+  margin:  auto ;
   width: 300px;
   max-width: 100%;
   height: 35px;
   font-size: 0.9rem;
-  border-radius: 20px 0px 0px 20px;
-  border: 1px solid var(--gray);
+  border-radius: 20px ;
+  border: none;
   background-color: var(--maize);
   color: #000;
   align-items: center;
-}
+  }
 
 #navbar-search-btn {
   margin-top: 0;
   width: 35px;
   height: 35px;
-  background-color: var(--jasmine);
+  background-color: var(--maize);
   border-radius: 0px 20px 20px 0px;
   transition: all 0.2s ease;
   border: none;
@@ -274,19 +282,14 @@
 }
 
 #navbar-search-btn:hover {
-  transform: scale(1.1);
-  background-color: var(--orange-pantone);
+  background-color: var(--jasmine);
+
+
 }
 
-#navbar-search-btn:hover i {
-  color: #fff;
-}
-
-.navbar-search-input:focus {
-  background-color: #fff;
-  color: #000;
-  outline: none;
-  border-color: var(--falu-red);
+.saludo.fw-bold{
+  color:white ;
+  
 }
 
 /* Contenedor de iconos (derecha) */
@@ -964,6 +967,23 @@
   background-color: var(--jasmine);
 }
 
+#logoutBtn{
+  text-decoration:none;
+  color:white;
+  font-size: 1.1rem;
+  gap: .3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background:transparent;
+  cursor: pointer;
+  height: 35px;
+  width: 80px;
+  transition: background-color 0.2s ease-in-out;
+  margin-right: 5px;
+}
+
 
 /* -------------------Add_PRoduct----------------------------------- */
 .add-product-container {
@@ -1212,14 +1232,8 @@
 }
 
 /* ==================== PÁGINA DE PRODUCTOS ==================== */
-
-/* Título principal */
-.products-page-title {
-  color: var(--falu-red);
-  font-weight: 700;
-  font-size: 2rem;
-  text-align: center;
-  margin-top: 2rem;
+#productSearchContent{
+  margin-top:30px;
 }
 
 /* ------------------ Tarjetas de Producto ------------------ */
@@ -1343,6 +1357,32 @@
 .products-search-form .icon-btn i {
   font-size: 1.3rem;
   color: var(--orange-pantone);
+}
+
+.btn.icon-btn.voice-search-btn.prod{
+  margin-right: 10px;
+}
+
+.btn.icon-btn.voice-search-btn.prod.listening i{
+  color: var(--falu-red) ;
+}
+.btn.icon-btn.voice-search-btn.prod.listening:hover{
+  background-color: #FF5C5C;
+  border: solid 1px var(--falu-red);
+}
+
+#order{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 55px;
+    width: auto;
+    cursor: pointer;
+    border-radius: 12px;
+    border: 2px solid var(--jasmine);
+    background: rgb(255, 255, 255);
+    margin-left: 10px;
+    
 }
 
 /* ==================== MODAL DE PRODUCTO ==================== */
@@ -2292,25 +2332,38 @@
 /* ==================== BOTÓN DE BÚSQUEDA POR VOZ ==================== */
 
 .voice-search-btn {
-    background-color: transparent;
-    border: 1px solid #ccc;
-    border-radius: 50%; /* Redondo */
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    font-size: 1.2em;
-    padding: 0;
-    margin-left: -5px; /* Pequeño ajuste de espacio */
-    transition: background-color 0.3s;
+  margin-top: 0;
+  width: 37px;
+  height: 35px;
+  background-color: var(--maize);
+  border: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px 0 0 20px;
 }
 
 .voice-search-btn:hover {
-    background-color: #f0f0f0;
+  background-color: var(--jasmine);
+  
 }
 
 /* Estilo cuando está escuchando */
 .voice-search-btn.listening {
     background-color: #FF5C5C; /* Rojo "grabando" */
-    color: white;
-    border-color: #FF5C5C;
+    color: var(--falu-red);
+    border: solid 1px var(--falu-red);
+}
+
+.voice-search-btn i {
+  font-size: 1rem;
+  color: var(--falu-red);
+}
+
+.voice-search-btn:hover i {
+  color: var(--falu-red);
+}
+.voice-search-btn.listening:hover i{
+     color: var(--falu-red);
 }

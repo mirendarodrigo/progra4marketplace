@@ -1178,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     voiceButton.addEventListener('click', () => {
         try {
             recognition.start();
-            voiceButton.innerHTML = '🎧'; // Cambia el ícono a "Escuchando"
+            voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i>'; // Cambia el ícono a "Escuchando"
             voiceButton.classList.add('listening');
         } catch(e) {
             console.error("Error al iniciar el reconocimiento de voz:", e);
@@ -1188,7 +1188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cuando el reconocimiento termina
     recognition.onend = () => {
-        voiceButton.innerHTML = '🎤'; // Vuelve al ícono original
+        voiceButton.innerHTML = '<i class="bi bi-mic"></i>'; // Vuelve al ícono original
         voiceButton.classList.remove('listening');
     };
 
