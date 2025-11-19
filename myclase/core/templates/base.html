@@ -55,25 +55,28 @@
 
     <!-- Searchbox (Centro) - Solo si NO estamos en la página de productos -->
     {% if not request.path == '/productos/' %}
-      <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
+     <div class="navserchContent">
+    <form class="d-flex" method="get" action="{% url 'market:product_list' %}">
 
         <input name="q" class="form-control navbar-search-input me-2 search-input" placeholder="Buscar productos..."
         aria-label="Search">
 
         <button type="button" id="voice-search-button" class="voice-search-btn" aria-label="Búsqueda por voz">
-          🎤
+          <i class="bi bi-mic"></i>
         </button>
 
         <button id="navbar-search-btn" type="submit" class="icon-btn">
           <i class="bi bi-search"></i>
         </button>
       </form>
+      </div>
     {% endif %}
-
+  
     <!-- Iconos de usuario (Derecha) -->
-    {% if request.path == '/' and user.is_authenticated %}
-    <h2 class="fw-bold text-dark mb-3">¡Hola, {{ user.first_name|default:user.username }}!</h2>
-    {% endif %}
+    {% if request.path == '/' and user.is_authenticated %} 
+         <div class="saludo ms-auto">
+    <h2 class="fw-bold text-white fs-4">¡Hola, {{ user.first_name|default:user.username }}!</h2>
+    {% endif %}</div>
     <ul class="d-flex align-items-center gap-2 mb-0">
       {% if user.is_authenticated %}
       <!-- Avatar -->
@@ -203,8 +206,8 @@
       </li>
       {% else %}
       <li>
-        <a href="{% url 'account_login' %}">
-          <img width="30" height="30" src="https://img.icons8.com/cute-clipart/30/enter-2.png" alt="Ingresar" />
+        <a href="{% url 'account_login' %}" id="logoutBtn" class="icon-btn  navbar-icon-btn" >
+          Ingresar <i class="bi bi-box-arrow-in-right"></i>
         </a>
       </li>
       {% endif %}

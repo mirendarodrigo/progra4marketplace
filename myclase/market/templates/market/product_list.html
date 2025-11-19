@@ -2,18 +2,16 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-5"> <h2 class="products-page-title mb-4 fw-bold text-center">Productos</h2>
 
   <div class="d-flex justify-content-center align-items-center mb-4 search-container">
-    <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form">
+    <form method="get" action="{% url 'market:product_list' %}" class="d-flex align-items-center w-100 products-search-form" id="productSearchContent">
         
         <input id="searchbox" name="q" placeholder="Buscar productos..." class="form-control search-input me-2" value="{{ query|default:'' }}">
         
-        <button type="button" id="voice-search-button" class="voice-search-btn" 
+        <button type="button" id="voice-search-button" class="btn icon-btn voice-search-btn prod" 
           aria-label="Búsqueda por voz">
-          🎤
+          <i class="bi bi-mic"></i>
         </button>
-
         <button id="searchbtn" type="submit" class="btn icon-btn me-2 search-btn" title="Buscar">
             <i class="bi bi-search"></i>
         </button>
@@ -21,7 +19,7 @@
         <button type="button" class="btn icon-btn toggle-view-btn" title="Cambiar vista">
             <i class="bi bi-list-ul"></i>
         </button>
-        <select name="sort" class="form-select me-2" onchange="this.form.submit()" style="width: auto;">
+        <select name="sort" class="form-select me-2" onchange="this.form.submit()" id="order">
             <option value="recent" {% if current_sort == 'recent' %}selected{% endif %}>Más recientes</option>
             <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Más antiguos</option>
             <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
