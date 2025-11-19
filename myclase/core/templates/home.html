@@ -23,13 +23,14 @@
       </div>
     </div>
     {% endif %} 
+
 <div class="container py-5">
   <h2 class="text-center mb-5 fw-bold ">Ultimas Novedades!</h2>
-
-  {% if products %}
     
+  {% if products %}
+    <div class="carousel-inner">
     <div id="productCarousel" class="carousel slide" data-bs-ride="carousel"> 
-      <div class="carousel-inner">
+      
         {% for product in products %}
         
           {% if forloop.counter0|divisibleby:4 %}
@@ -70,7 +71,9 @@
             {% endif %}
 
         {% endfor %}
+        <div class="controles">
       </div>
+        </div>
         
         <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -79,9 +82,9 @@
         <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
-        </button>
+        </button></div>
         
-      </div>
+       
           
     {% else %}
       <p class="text-center fs-5 text-muted">Aún no hay productos publicados en el mercadito.</p>
@@ -138,10 +141,7 @@
                 Publicado por: <span id="modal-product-seller"></span>
               </button>
             </div>
-            
-            <button type="button" class="btn btn-success w-100 mb-4" id="modal-chat-btn">
-                <i class="bi bi-whatsapp"></i> Chatear con el vendedor
-            </button>
+                      
 
             <div class="d-flex gap-2 mt-3">
               <button type="button" class="btn btn-outline-warning favorite-btn flex-grow-1" id="modal-favorite-btn">
