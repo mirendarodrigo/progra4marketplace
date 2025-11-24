@@ -134,11 +134,14 @@ else:
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # --------------------------------------------------------------------
 
-# Rutas de archivos estáticos (CSS, JS, Img del diseño)
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"  # Carpeta donde Render recolecta todo
-STATICFILES_DIRS = [BASE_DIR / "static"] # Carpeta donde tú guardas tus estilos
+# STATIC_ROOT: Donde se guardan los archivos finales (déjalo como está)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# STATICFILES_DIRS: Donde Django BUSCA los archivos originales
+STATICFILES_DIRS = [
+    BASE_DIR / "static",                  # Busca dentro de myclase (por si acaso)
+    os.path.join(os.getcwd(), 'static'),  # <--- ¡ESTA ES LA SOLUCIÓN! (Busca en la raíz real)
+]
 # WhiteNoise: Usamos esta versión "segura" que no rompe si falta un archivo
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
