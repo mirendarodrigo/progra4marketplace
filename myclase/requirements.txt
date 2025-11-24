@@ -5,10 +5,12 @@ certifi==2025.10.5
 cffi==1.17.1
 charset-normalizer==3.4.3
 chromedriver-autoinstaller==0.6.4
+cloudinary==1.44.1
 cryptography==45.0.6
 dj-database-url==3.0.1
 Django==5.2.5
 django-allauth==65.11.1
+django-cloudinary-storage==0.3.0
 django-environ==0.12.0
 git-filter-repo==2.47.0
 gunicorn==23.0.0
