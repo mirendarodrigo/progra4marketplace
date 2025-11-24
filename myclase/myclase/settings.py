@@ -130,33 +130,37 @@ else:
             ssl_require=True,
         )
     }
+# settings.py
+
+import os
+
+# ...
+
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS (CSS, JS, Imágenes del diseño)
+# ARCHIVOS ESTÁTICOS (Configuración Corregida para Render)
 # --------------------------------------------------------------------
 
-# 1. LA URL PÚBLICA (¡Esta es la línea que te faltaba!)
 STATIC_URL = '/static/'
 
-# 2. CARPETA DE DESTINO (Donde Render guarda todo al final)
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# DESTINO: Donde Render guardará los archivos finales.
+# Usamos os.getcwd() para forzar que sea en la raíz del proyecto, no dentro de 'myclase'
+STATIC_ROOT = os.path.join(os.getcwd(), 'staticfiles')
 
-# 3. CARPETAS DE ORIGEN (Donde Django busca tus archivos)
+# ORIGEN: Donde están tus archivos ahora.
+# Solo ponemos UNA ruta (la de la raíz) para evitar duplicados.
 STATICFILES_DIRS = [
-    BASE_DIR / "static",                  # Busca dentro de la carpeta del proyecto
-    os.path.join(os.getcwd(), 'static'),  # Busca en la raíz absoluta (La solución para Render)
+    os.path.join(os.getcwd(), 'static'),
 ]
 
-# 4. EL MOTOR (WhiteNoise - Versión segura)
+# MOTOR: WhiteNoise "relajado"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-
 # --------------------------------------------------------------------
-# ARCHIVOS MEDIA (Subidos por usuarios)
+# MEDIA (Cloudinary) - Esto déjalo igual, ya funciona
 # --------------------------------------------------------------------
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Configuración de Cloudinary
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
