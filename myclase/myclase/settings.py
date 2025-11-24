@@ -144,22 +144,38 @@ import os
 REPO_ROOT = BASE_DIR.parent 
 
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS (Configuración Final Validada)
+# ARCHIVOS ESTÁTICOS (Configuración Dinámica)
 # --------------------------------------------------------------------
 
 STATIC_URL = '/static/'
 
-# 1. DESTINO: Guardamos los archivos fuera de la app, en la raíz del sistema
-# Usamos .parent para salir de 'myclase' y guardar en 'src/staticfiles'
+# 1. Definimos las dos rutas posibles
+ruta_adentro = BASE_DIR / "static"        # /src/myclase/static
+ruta_afuera = BASE_DIR.parent / "static"  # /src/static (La raíz)
+
+STATICFILES_DIRS = []
+
+# 2. Lógica Inteligente: Solo agregamos la que realmente existe
+if os.path.isdir(ruta_adentro):
+    STATICFILES_DIRS.append(ruta_adentro)
+    print(f"--> SÍ EXISTE (Adentro): {ruta_adentro}", file=sys.stderr)
+
+if os.path.isdir(ruta_afuera):
+    STATICFILES_DIRS.append(ruta_afuera)
+    print(f"--> SÍ EXISTE (Afuera): {ruta_afuera}", file=sys.stderr)
+
+# Si ninguna existe, imprimimos una alerta
+if not STATICFILES_DIRS:
+    print("--> ¡ALERTA! No encontré la carpeta 'static' en ningún lado.", file=sys.stderr)
+
+
+# 3. Destino Final (Esto ya lo tenemos bien)
+# Lo guardamos en la raíz (/src/staticfiles) para que sea limpio
 STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
-# 2. ORIGEN: La única ruta que existe (dentro de myclase)
-STATICFILES_DIRS = [
-    BASE_DIR / "static", 
-]
-
-# 3. MOTOR: WhiteNoise
+# 4. Motor WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 
 # --------------------------------------------------------------------
 # MEDIA (Cloudinary)
