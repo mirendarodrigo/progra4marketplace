@@ -133,30 +133,23 @@ else:
 # --------------------------------------------------------------------
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # --------------------------------------------------------------------
-# STATIC_URL = "/static/"
-# STATIC_ROOT = BASE_DIR / "staticfiles"  # 👈 para collectstatic
-# STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Rutas de archivos estáticos (CSS, JS, Img del diseño)
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Carpeta donde Render recolecta todo
+STATICFILES_DIRS = [BASE_DIR / "static"] # Carpeta donde tú guardas tus estilos
 
-# MEDIA_URL = "/media/"
-# MEDIA_ROOT = BASE_DIR / "media"
-# --- STATIC FILES (CSS, JS, Placeholder) con WhiteNoise ---
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Tu carpeta static actual
-# Activa la compresión y cacheo de WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# WhiteNoise: Usamos esta versión "segura" que no rompe si falta un archivo
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
-# --- MEDIA FILES (Fotos de productos) con Cloudinary ---
-MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
+# Rutas de archivos Media (Subidos por usuarios)
+MEDIA_URL = "/media/"
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 # Configuración de Cloudinary
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': env('CLOUDINARY_API_KEY'),
+    'API_SECRET': env('CLOUDINARY_API_SECRET'),
 }
 # --------------------------------------------------------------------
 # CSRF Y ORÍGENES CONFIABLES
