@@ -24,6 +24,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # --------------------------------------------------------------------
 INSTALLED_APPS = [
     # Django
+    "cloudinary_storage",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
+    'cloudinary', # <-- Agregar esto
 
     # Apps propias
     "core",
@@ -131,15 +133,31 @@ else:
 # --------------------------------------------------------------------
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # --------------------------------------------------------------------
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"  # 👈 para collectstatic
-STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATIC_URL = "/static/"
+# STATIC_ROOT = BASE_DIR / "staticfiles"  # 👈 para collectstatic
+# STATICFILES_DIRS = [BASE_DIR / "static"]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = BASE_DIR / "media"
+# --- STATIC FILES (CSS, JS, Placeholder) con WhiteNoise ---
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Tu carpeta static actual
+# Activa la compresión y cacheo de WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# --- MEDIA FILES (Fotos de productos) con Cloudinary ---
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Configuración de Cloudinary
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
 # --------------------------------------------------------------------
 # CSRF Y ORÍGENES CONFIABLES
 # --------------------------------------------------------------------
