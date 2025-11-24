@@ -1,4 +1,5 @@
   {% extends "base.html" %}
+  {% load static %}
 
 {% block content %}
 <div class="add-product-container">
@@ -11,8 +12,8 @@
     <div class="image-upload-group">
       <div class="image-preview-wrapper">
         <img id="imagePreview"
-             src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}{{ MEDIA_URL }}products/placeholder.png{% endif %}"
-             data-placeholder="{{ MEDIA_URL }}products/placeholder.png"
+             src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}{% static 'img/placeholder.png' %}{% endif %}"
+             data-placeholder="{% static 'img/placeholder.png' %}"
              alt="Preview imagen"
              class="image-preview">
       </div>
