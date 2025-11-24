@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("agregarBtn").onclick = () => {
             // Redirigir a add_product con el código de barras
-            window.location.href = `/productos/add/?barcode=${code}`;
+            window.location.href = `/add/?barcode=${code}`;
         };
 
         document.getElementById("descartarBtn").onclick = () => {
