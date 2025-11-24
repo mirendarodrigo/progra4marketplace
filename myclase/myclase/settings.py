@@ -191,3 +191,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mirendarodrigo@gmail.com' 
 EMAIL_HOST_PASSWORD = 'qlaj sfsi sgpv qbdi'  
+# --- DEBUGGING EN LOGS (Borrar después) ---
+import sys
+print(f"--> ESTOY EN: {os.getcwd()}", file=sys.stderr)
+print(f"--> BASE_DIR ES: {BASE_DIR}", file=sys.stderr)
+print(f"--> STATIC_ROOT ESTÁ CONFIGURADO EN: {STATIC_ROOT}", file=sys.stderr)
+print(f"--> STATICFILES_DIRS SON: {STATICFILES_DIRS}", file=sys.stderr)
+# ------------------------------------------
