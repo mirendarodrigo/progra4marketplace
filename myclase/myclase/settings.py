@@ -136,23 +136,35 @@ import os
 
 # ...
 
+# settings.py
+
+# --- DEFINIR LA RAÍZ DEL REPOSITORIO ---
+# BASE_DIR es '.../src/myclase'
+# REPO_ROOT es '.../src'
+REPO_ROOT = BASE_DIR.parent 
+
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS (Configuración Corregida para Render)
+# ARCHIVOS ESTÁTICOS
 # --------------------------------------------------------------------
-REPO_ROOT = BASE_DIR.parent
-# 1. DESTINO: Guardamos los estáticos compilados en la raíz real
+
+# 1. LA URL PÚBLICA (¡ESTA ES LA LÍNEA QUE FALTABA!)
+STATIC_URL = '/static/' 
+
+# 2. DESTINO: Guardamos los estáticos compilados en la raíz real
 STATIC_ROOT = REPO_ROOT / "staticfiles"
 
-# 2. ORIGEN: Buscamos los archivos en la raíz real
+# 3. ORIGEN: Estrategia "Doble Red"
+# Le damos las dos opciones. Una dará advertencia, pero la otra FUNCIONARÁ.
 STATICFILES_DIRS = [
-    REPO_ROOT / "static",
+    REPO_ROOT / "static",   # Opción A: static en la raíz (hermano de myclase)
+    BASE_DIR / "static",    # Opción B: static dentro de myclase
 ]
 
-# 3. MOTOR: WhiteNoise
+# 4. MOTOR: WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # --------------------------------------------------------------------
-# MEDIA (Cloudinary) - Esto déjalo igual, ya funciona
+# MEDIA (Cloudinary) - Esto déjalo igual
 # --------------------------------------------------------------------
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
