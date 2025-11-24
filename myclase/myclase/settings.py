@@ -131,37 +131,37 @@ else:
         )
     }
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS Y MEDIA
+# ARCHIVOS ESTÁTICOS (CSS, JS, Imágenes del diseño)
 # --------------------------------------------------------------------
 
-# STATIC_ROOT: Donde se guardan los archivos finales (déjalo como está)
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# 1. LA URL PÚBLICA (¡Esta es la línea que te faltaba!)
+STATIC_URL = '/static/'
 
-# STATICFILES_DIRS: Donde Django BUSCA los archivos originales
+# 2. CARPETA DE DESTINO (Donde Render guarda todo al final)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 3. CARPETAS DE ORIGEN (Donde Django busca tus archivos)
 STATICFILES_DIRS = [
-    BASE_DIR / "static",                  # Busca dentro de myclase (por si acaso)
-    os.path.join(os.getcwd(), 'static'),  # <--- ¡ESTA ES LA SOLUCIÓN! (Busca en la raíz real)
+    BASE_DIR / "static",                  # Busca dentro de la carpeta del proyecto
+    os.path.join(os.getcwd(), 'static'),  # Busca en la raíz absoluta (La solución para Render)
 ]
-# WhiteNoise: Usamos esta versión "segura" que no rompe si falta un archivo
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
-# Rutas de archivos Media (Subidos por usuarios)
-MEDIA_URL = "/media/"
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+# 4. EL MOTOR (WhiteNoise - Versión segura)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+
+# --------------------------------------------------------------------
+# ARCHIVOS MEDIA (Subidos por usuarios)
+# --------------------------------------------------------------------
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # Configuración de Cloudinary
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
     'API_SECRET': env('CLOUDINARY_API_SECRET'),
 }
-# --------------------------------------------------------------------
-# CSRF Y ORÍGENES CONFIABLES
-# --------------------------------------------------------------------
-CSRF_TRUSTED_ORIGINS = [
-    "https://filling-lined-timber-inherited.trycloudflare.com",
-    "https://*.onrender.com",  # 👈 necesario para Render
-]
-
 # --------------------------------------------------------------------
 # EMAIL (desarrollo)
 # --------------------------------------------------------------------
