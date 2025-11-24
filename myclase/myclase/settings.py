@@ -139,20 +139,16 @@ import os
 # --------------------------------------------------------------------
 # ARCHIVOS ESTÁTICOS (Configuración Corregida para Render)
 # --------------------------------------------------------------------
+REPO_ROOT = BASE_DIR.parent
+# 1. DESTINO: Guardamos los estáticos compilados en la raíz real
+STATIC_ROOT = REPO_ROOT / "staticfiles"
 
-STATIC_URL = '/static/'
-
-# DESTINO: Donde Render guardará los archivos finales.
-# Usamos os.getcwd() para forzar que sea en la raíz del proyecto, no dentro de 'myclase'
-STATIC_ROOT = os.path.join(os.getcwd(), 'staticfiles')
-
-# ORIGEN: Donde están tus archivos ahora.
-# Solo ponemos UNA ruta (la de la raíz) para evitar duplicados.
+# 2. ORIGEN: Buscamos los archivos en la raíz real
 STATICFILES_DIRS = [
-    os.path.join(os.getcwd(), 'static'),
+    REPO_ROOT / "static",
 ]
 
-# MOTOR: WhiteNoise "relajado"
+# 3. MOTOR: WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # --------------------------------------------------------------------
