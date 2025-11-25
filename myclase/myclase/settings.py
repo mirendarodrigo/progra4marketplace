@@ -2,6 +2,7 @@ from pathlib import Path
 import environ
 import dj_database_url  # 👈 necesario para Render (PostgreSQL)
 import os
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -132,49 +133,47 @@ else:
         )
     }
 # --------------------------------------------------------------------
-# 1. RUTAS DE ESTÁTICOS (CSS/JS)
+# CONFIGURACIÓN "TODO TERRENO" DE ESTÁTICOS
 # --------------------------------------------------------------------
 STATIC_URL = '/static/'
-# Guardamos los estáticos en la raíz del proyecto (fuera de myclase)
-STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
-# Buscamos tus archivos en la carpeta static raíz
-STATICFILES_DIRS = [
-    BASE_DIR / "static", 
-]
+# 1. Definimos las dos rutas posibles (La del proyecto y la superior)
+# Así cubrimos si Render pone la carpeta en 'src/' o en 'src/myclase/'
+ruta_base = BASE_DIR / "static"
+ruta_superior = BASE_DIR.parent / "static"
+
+STATICFILES_DIRS = []
+
+# Agregamos ambas rutas (si existen) para que Django no tenga excusas
+if os.path.exists(ruta_base):
+    STATICFILES_DIRS.append(ruta_base)
+if os.path.exists(ruta_superior):
+    STATICFILES_DIRS.append(ruta_superior)
+
+# Destino final (Raíz)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # --------------------------------------------------------------------
-# 2. RUTAS DE MEDIA (Imágenes subidas)
+# MOTOR DE ALMACENAMIENTO (MODO SEGURO)
 # --------------------------------------------------------------------
-MEDIA_URL = '/media/'
-# No definimos MEDIA_ROOT porque Cloudinary no usa disco local
-
-# --------------------------------------------------------------------
-# 3. CONFIGURACIÓN MODERNA DE ALMACENAMIENTO (STORAGES)
-# Esta es la clave para que no peleen.
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
-# ALMACENAMIENTO (MODO NATIVO / SIN ERRORES)
-# --------------------------------------------------------------------
+# Usamos el motor nativo de Django para Static (Cero errores de compresión)
+# Usamos Cloudinary para Media
 STORAGES = {
-    # 1. STATIC: Usamos el motor por defecto de Django.
-    # Solo copia archivos. No comprime. No falla.
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
-    
-    # 2. MEDIA: Cloudinary (Esto sigue igual)
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
 
-# --- PARCHE DE COMPATIBILIDAD ---
-# Apuntamos también al motor nativo de Django
+# Parche de compatibilidad para librería Cloudinary
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 # --------------------------------------------------------------------
-# 4. CREDENCIALES CLOUDINARY
+# MEDIA (CLOUDINARY)
 # --------------------------------------------------------------------
+MEDIA_URL = '/media/'
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
