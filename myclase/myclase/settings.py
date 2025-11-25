@@ -23,6 +23,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # APLICACIONES
 # --------------------------------------------------------------------
 INSTALLED_APPS = [
+    "cloudinary_storage",
     # Django
     "django.contrib.admin",
     "django.contrib.auth",
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     "chat",
     "scanner",
     "dashboard",
+    
+    "cloudinary",
 ]
 
 SITE_ID = 1
@@ -137,8 +140,18 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# --------------------------------------------------------------------
+# MEDIA (Imágenes de usuarios -> Cloudinary)
+# --------------------------------------------------------------------
+MEDIA_URL = '/media/'  # URL base pública
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Credenciales (Las toma de Render Environment)
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': env('CLOUDINARY_API_KEY'),
+    'API_SECRET': env('CLOUDINARY_API_SECRET'),
+}
 
 # --------------------------------------------------------------------
 # CSRF Y ORÍGENES CONFIABLES
