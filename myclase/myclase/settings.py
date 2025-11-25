@@ -2,7 +2,6 @@ from pathlib import Path
 import environ
 import dj_database_url  # 👈 necesario para Render (PostgreSQL)
 import os
-import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +24,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # --------------------------------------------------------------------
 INSTALLED_APPS = [
     # Django
-    "cloudinary_storage",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,7 +38,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
-    'cloudinary', # <-- Agregar esto
 
     # Apps propias
     "core",
@@ -131,56 +128,26 @@ else:
             ssl_require=True,
         )
     }
-# settings.py
+# --------------------------------------------------------------------
+# ARCHIVOS ESTÁTICOS Y MEDIA
+# --------------------------------------------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # 👈 para collectstatic
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
-import os
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# ...
-
-# settings.py
-
-# --- DEFINIR LA RAÍZ DEL REPOSITORIO ---
-# BASE_DIR es '.../src/myclase'
-# REPO_ROOT es '.../src'
-REPO_ROOT = BASE_DIR.parent 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS (Configuración Forzada)
+# CSRF Y ORÍGENES CONFIABLES
 # --------------------------------------------------------------------
-
-STATIC_URL = '/static/'
-
-# 1. Definimos la raíz del proyecto (El nivel superior a myclase)
-# Si BASE_DIR es '.../src/myclase', PROJECT_ROOT será '.../src'
-PROJECT_ROOT = BASE_DIR.parent
-
-# 2. ORIGEN: Forzamos la ruta externa (donde sabemos que está styles.css)
-# Quitamos los 'if' para obligar a Django a mirar aquí.
-STATICFILES_DIRS = [
-    PROJECT_ROOT / "static",
+CSRF_TRUSTED_ORIGINS = [
+    "https://filling-lined-timber-inherited.trycloudflare.com",
+    "https://*.onrender.com",  # 👈 necesario para Render
 ]
 
-# 3. DESTINO: Carpeta 'staticfiles' en la raíz
-STATIC_ROOT = PROJECT_ROOT / "staticfiles"
-
-# 4. Imprimimos para confirmar en logs (Debugging)
-print(f"--> FORZANDO ORIGEN EN: {PROJECT_ROOT / 'static'}", file=sys.stderr)
-print(f"--> FORZANDO DESTINO EN: {STATIC_ROOT}", file=sys.stderr)
-
-# 5. MOTOR: WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-# --------------------------------------------------------------------
-# MEDIA (Cloudinary) - Igual que siempre
-# --------------------------------------------------------------------
-MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': env('CLOUDINARY_API_KEY'),
-    'API_SECRET': env('CLOUDINARY_API_SECRET'),
-}
 # --------------------------------------------------------------------
 # EMAIL (desarrollo)
 # --------------------------------------------------------------------
@@ -206,10 +173,3 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mirendarodrigo@gmail.com' 
 EMAIL_HOST_PASSWORD = 'qlaj sfsi sgpv qbdi'  
-# --- DEBUGGING EN LOGS (Borrar después) ---
-import sys
-print(f"--> ESTOY EN: {os.getcwd()}", file=sys.stderr)
-print(f"--> BASE_DIR ES: {BASE_DIR}", file=sys.stderr)
-print(f"--> STATIC_ROOT ESTÁ CONFIGURADO EN: {STATIC_ROOT}", file=sys.stderr)
-print(f"--> STATICFILES_DIRS SON: {STATICFILES_DIRS}", file=sys.stderr)
-# ------------------------------------------
