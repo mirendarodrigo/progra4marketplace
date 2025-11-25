@@ -164,7 +164,7 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 # --------------------------------------------------------------------
 # 4. CREDENCIALES CLOUDINARY
 # --------------------------------------------------------------------
