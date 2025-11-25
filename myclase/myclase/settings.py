@@ -143,10 +143,19 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # --------------------------------------------------------------------
 # MEDIA (Imágenes de usuarios -> Cloudinary)
 # --------------------------------------------------------------------
-MEDIA_URL = '/media/'  # URL base pública
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STORAGES = {
+    # 1. "default": Para archivos subidos por usuarios (MEDIA) -> CLOUDINARY
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    
+    # 2. "staticfiles": Para CSS/JS del sistema (STATIC) -> WHITENOISE
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
-# Credenciales (Las toma de Render Environment)
+# Configuración de credenciales Cloudinary (se mantiene igual)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
