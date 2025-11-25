@@ -145,41 +145,33 @@ import os
 REPO_ROOT = BASE_DIR.parent 
 
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS (Configuración Dinámica)
+# ARCHIVOS ESTÁTICOS (Configuración Forzada)
 # --------------------------------------------------------------------
 
 STATIC_URL = '/static/'
 
-# 1. Definimos las dos rutas posibles
-ruta_adentro = BASE_DIR / "static"        # /src/myclase/static
-ruta_afuera = BASE_DIR.parent / "static"  # /src/static (La raíz)
+# 1. Definimos la raíz del proyecto (El nivel superior a myclase)
+# Si BASE_DIR es '.../src/myclase', PROJECT_ROOT será '.../src'
+PROJECT_ROOT = BASE_DIR.parent
 
-STATICFILES_DIRS = []
+# 2. ORIGEN: Forzamos la ruta externa (donde sabemos que está styles.css)
+# Quitamos los 'if' para obligar a Django a mirar aquí.
+STATICFILES_DIRS = [
+    PROJECT_ROOT / "static",
+]
 
-# 2. Lógica Inteligente: Solo agregamos la que realmente existe
-if os.path.isdir(ruta_adentro):
-    STATICFILES_DIRS.append(ruta_adentro)
-    print(f"--> SÍ EXISTE (Adentro): {ruta_adentro}", file=sys.stderr)
+# 3. DESTINO: Carpeta 'staticfiles' en la raíz
+STATIC_ROOT = PROJECT_ROOT / "staticfiles"
 
-if os.path.isdir(ruta_afuera):
-    STATICFILES_DIRS.append(ruta_afuera)
-    print(f"--> SÍ EXISTE (Afuera): {ruta_afuera}", file=sys.stderr)
+# 4. Imprimimos para confirmar en logs (Debugging)
+print(f"--> FORZANDO ORIGEN EN: {PROJECT_ROOT / 'static'}", file=sys.stderr)
+print(f"--> FORZANDO DESTINO EN: {STATIC_ROOT}", file=sys.stderr)
 
-# Si ninguna existe, imprimimos una alerta
-if not STATICFILES_DIRS:
-    print("--> ¡ALERTA! No encontré la carpeta 'static' en ningún lado.", file=sys.stderr)
-
-
-# 3. Destino Final (Esto ya lo tenemos bien)
-# Lo guardamos en la raíz (/src/staticfiles) para que sea limpio
-STATIC_ROOT = BASE_DIR.parent / "staticfiles"
-
-# 4. Motor WhiteNoise
+# 5. MOTOR: WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-
 # --------------------------------------------------------------------
-# MEDIA (Cloudinary)
+# MEDIA (Cloudinary) - Igual que siempre
 # --------------------------------------------------------------------
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
