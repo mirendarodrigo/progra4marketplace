@@ -2,6 +2,7 @@ from pathlib import Path
 import environ
 import dj_database_url  # 👈 necesario para Render (PostgreSQL)
 import os
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
