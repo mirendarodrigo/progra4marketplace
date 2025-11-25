@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("modificarBtn").onclick = () => {
             // Redirigir a la vista de modificar producto (mod_product)
-            window.location.href = `/productos/${producto.id}/modificar/`;
+            window.location.href = `/productos/${producto.id}/add/`;
         };
 
         document.getElementById("cancelarBtn").onclick = () => {
