@@ -156,7 +156,7 @@ MEDIA_URL = '/media/'
 STORAGES = {
     # "staticfiles": Usamos WhiteNoise RELAJADO (Sin 'Manifest') para el CSS
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.WhiteNoiseStorage",
     },
     
     # "default": Usamos Cloudinary para las fotos subidas
@@ -164,7 +164,7 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.WhiteNoiseStorage",
 # --------------------------------------------------------------------
 # 4. CREDENCIALES CLOUDINARY
 # --------------------------------------------------------------------
