@@ -153,18 +153,25 @@ MEDIA_URL = '/media/'
 # 3. CONFIGURACIÓN MODERNA DE ALMACENAMIENTO (STORAGES)
 # Esta es la clave para que no peleen.
 # --------------------------------------------------------------------
+# --------------------------------------------------------------------
+# ALMACENAMIENTO (MODO NATIVO / SIN ERRORES)
+# --------------------------------------------------------------------
 STORAGES = {
-    # "staticfiles": Usamos WhiteNoise RELAJADO (Sin 'Manifest') para el CSS
+    # 1. STATIC: Usamos el motor por defecto de Django.
+    # Solo copia archivos. No comprime. No falla.
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.WhiteNoiseStorage",
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
     
-    # "default": Usamos Cloudinary para las fotos subidas
+    # 2. MEDIA: Cloudinary (Esto sigue igual)
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
 }
-STATICFILES_STORAGE = "whitenoise.storage.WhiteNoiseStorage",
+
+# --- PARCHE DE COMPATIBILIDAD ---
+# Apuntamos también al motor nativo de Django
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 # --------------------------------------------------------------------
 # 4. CREDENCIALES CLOUDINARY
 # --------------------------------------------------------------------
