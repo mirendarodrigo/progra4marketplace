@@ -19,8 +19,7 @@ class Product(models.Model):
         upload_to="products/",  
         blank=True,
         null=True,
-        default="products/placeholder.png"
-    )   
+        )   
     
     barcode = models.CharField(
         max_length=13,  
