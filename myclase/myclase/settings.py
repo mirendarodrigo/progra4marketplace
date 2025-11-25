@@ -2,7 +2,7 @@ from pathlib import Path
 import environ
 import dj_database_url  # 👈 necesario para Render (PostgreSQL)
 import os
-import sys
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +24,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # APLICACIONES
 # --------------------------------------------------------------------
 INSTALLED_APPS = [
-    "cloudinary_storage",
     # Django
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,9 +47,7 @@ INSTALLED_APPS = [
     "chat",
     "scanner",
     "dashboard",
-    
-    "cloudinary",
-]
+   ]
 
 SITE_ID = 1
 
@@ -133,52 +130,25 @@ else:
         )
     }
 # --------------------------------------------------------------------
-# CONFIGURACIÓN "TODO TERRENO" DE ESTÁTICOS
+# ARCHIVOS ESTÁTICOS (CSS/JS) - WhiteNoise Puro
 # --------------------------------------------------------------------
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# 1. Definimos las dos rutas posibles (La del proyecto y la superior)
-# Así cubrimos si Render pone la carpeta en 'src/' o en 'src/myclase/'
-ruta_base = BASE_DIR / "static"
-ruta_superior = BASE_DIR.parent / "static"
+# Buscamos en ambas rutas por seguridad
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR.parent / "static",
+]
 
-STATICFILES_DIRS = []
-
-# Agregamos ambas rutas (si existen) para que Django no tenga excusas
-if os.path.exists(ruta_base):
-    STATICFILES_DIRS.append(ruta_base)
-if os.path.exists(ruta_superior):
-    STATICFILES_DIRS.append(ruta_superior)
-
-# Destino final (Raíz)
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# Usamos WhiteNoise simple. Sin compresión para evitar errores.
+STATICFILES_STORAGE = 'whitenoise.storage.WhiteNoiseStorage'
 
 # --------------------------------------------------------------------
-# MOTOR DE ALMACENAMIENTO (MODO SEGURO)
-# --------------------------------------------------------------------
-# Usamos el motor nativo de Django para Static (Cero errores de compresión)
-# Usamos Cloudinary para Media
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-}
-
-# Parche de compatibilidad para librería Cloudinary
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
-# --------------------------------------------------------------------
-# MEDIA (CLOUDINARY)
+# MEDIA (Imágenes subidas) - Disco Local (Efímero en Render)
 # --------------------------------------------------------------------
 MEDIA_URL = '/media/'
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': env('CLOUDINARY_API_KEY'),
-    'API_SECRET': env('CLOUDINARY_API_SECRET'),
-}
+MEDIA_ROOT = BASE_DIR / 'media'
 # --------------------------------------------------------------------
 # CSRF Y ORÍGENES CONFIABLES
 # --------------------------------------------------------------------
