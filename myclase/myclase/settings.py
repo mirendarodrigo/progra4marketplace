@@ -132,36 +132,47 @@ else:
         )
     }
 # --------------------------------------------------------------------
-# ARCHIVOS ESTÁTICOS Y MEDIA
+# 1. RUTAS DE ESTÁTICOS (CSS/JS)
 # --------------------------------------------------------------------
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"  # 👈 para collectstatic
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_URL = '/static/'
+# Guardamos los estáticos en la raíz del proyecto (fuera de myclase)
+STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Buscamos tus archivos en la carpeta static raíz
+STATICFILES_DIRS = [
+    BASE_DIR / "static", 
+]
 
 # --------------------------------------------------------------------
-# MEDIA (Imágenes de usuarios -> Cloudinary)
+# 2. RUTAS DE MEDIA (Imágenes subidas)
+# --------------------------------------------------------------------
+MEDIA_URL = '/media/'
+# No definimos MEDIA_ROOT porque Cloudinary no usa disco local
+
+# --------------------------------------------------------------------
+# 3. CONFIGURACIÓN MODERNA DE ALMACENAMIENTO (STORAGES)
+# Esta es la clave para que no peleen.
 # --------------------------------------------------------------------
 STORAGES = {
-    # 1. "default": Para archivos subidos por usuarios (MEDIA) -> CLOUDINARY
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    
-    # 2. "staticfiles": Para CSS/JS del sistema (STATIC) -> WHITENOISE
+    # "staticfiles": Usamos WhiteNoise RELAJADO (Sin 'Manifest') para el CSS
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
+    
+    # "default": Usamos Cloudinary para las fotos subidas
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
 }
 
-# Configuración de credenciales Cloudinary (se mantiene igual)
+# --------------------------------------------------------------------
+# 4. CREDENCIALES CLOUDINARY
+# --------------------------------------------------------------------
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': env('CLOUDINARY_API_KEY'),
     'API_SECRET': env('CLOUDINARY_API_SECRET'),
 }
-
 # --------------------------------------------------------------------
 # CSRF Y ORÍGENES CONFIABLES
 # --------------------------------------------------------------------
